@@ -1,0 +1,18 @@
+
+html
+  head
+    title talkpage
+    link(rel='stylesheet',href='../page/page.css')
+    script(src='http://192.168.1.117:8072/doodle.js')
+    script(src='http://cdn.zjut.com/jquery/1.7.1.js')
+    script(src='../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js')
+    script(src='../page/action.js')
+    script(src='../page/handle.js')
+  body
+    #wrap
+      #post
+      #talk.post
+        #time.time time
+        input.name(maxlength='10') guest
+        input.text(maxlength='50') text
+    #head

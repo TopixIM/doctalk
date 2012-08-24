@@ -1,0 +1,22 @@
+{
+  "name": "talkpage",
+  "version": "0.0.0",
+  "description": "simple page for chating",
+  "main": "server.coffee",
+  "scripts": {
+    "test": "coffee server.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jiyinyiyong/talkpage.git"
+  },
+  "keywords": [
+    "chat"
+  ],
+  "author": "jiyinyiyong",
+  "license": "MIT",
+  "dependencies": {
+    "socket.io": "0.9.x",
+    "mongodb": "1.1.x"
+  }
+}

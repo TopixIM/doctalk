@@ -1,0 +1,57 @@
+
+body
+  margin 0px
+  min-width 1800px
+  overflow-x hidden
+
+  #wrap, #head
+    vertical-align top
+    display inline-block
+    width 50%
+    height 100%
+    box-shadow 0px 0px 1px gray
+
+    #post
+      height 100%
+      overflow auto
+
+    #talk
+      position absolute
+      bottom 0px
+      left 0px
+      background white
+      box-shadow 0px -5px 5px white
+      
+      input
+        outline none
+        border none
+        background hsl(300,80,90)
+
+      .name
+        background hsl(300,90,95)
+
+  .post
+    width 900px
+    height 20px
+
+    .time, .name, .text, input
+      display inline-block
+      overflow hidden
+      box-shadow -10px 0px 10px white
+      font-size 13px
+      font-family monospace
+
+    div.name, div.text
+      margin 0px -4px 0px 0px
+
+    .time
+      width 100px
+
+    .name
+      width 100px
+
+    .text
+      width 700px
+
+  .page
+    background hsl(240,80,90)
