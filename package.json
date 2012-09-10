@@ -16,7 +16,6 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "dependencies": {
-    "socket.io": "0.9.x",
-    "mongodb": "1.1.x"
+    "socket.io": "0.9.x"
   }
 }
