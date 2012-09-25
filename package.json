@@ -16,6 +16,7 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "dependencies": {
-    "socket.io": "0.9.x"
+    "socket.io": "0.9.x",
+    "mongo-lite": "0.3.x"
   }
 }

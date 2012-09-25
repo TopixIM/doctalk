@@ -1,3 +1,0 @@
-
-
-talkpage with localStorage  
