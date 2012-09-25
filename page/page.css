@@ -29,9 +29,27 @@ input {
 #clock {
   position: absolute;
   top: 60px;
-  left: 80px;
+  left: 70px;
   font-size: 60px;
   color: #e8e8f7;
+}
+#msg {
+  position: absolute;
+  top: 140px;
+  left: 70px;
+  width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#msg .error {
+  background: #f2f2f2;
+  margin: 6px 0px;
+  padding: 4px;
+}
+#msg .error .err-name {
+  color: #f00;
+  margin-right: 8px;
+  line-height: 20px;
 }
 #setting {
   position: fixed;

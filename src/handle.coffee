@@ -9,12 +9,19 @@ ls = localStorage
 
 s.on 'ready', -> show 'ready'
 
-tmpl = """
+post_tmpl = """
 .unit
    img(src='#\{link\}').avatar
    span.text= text
 """
-put = jade.compile(tmpl)
+put = jade.compile post_tmpl
+
+err_tmpl ="""
+.error
+  span.err-name :(
+  span.err-info= text
+"""
+make_err = jade.compile err_tmpl
 
 nn = (n) -> if n < 10 then "0#{n}" else "#{n}"
 
@@ -61,7 +68,6 @@ $ ->
       e.preventDefault()
       left = $('body').scrollLeft()
       screen_width = $(window).width()
-      show screen_width
       if left < 10
         $('body').animate scrollLeft: (2000 - screen_width)
       else
@@ -94,3 +100,6 @@ $ ->
     $('#inside').append (put link: ls.avatar, text: 'ffine')
 
   repeat 200, -> $('#clock').text time()
+
+  [1..10].forEach ->
+    $('#msg').append (make_err text: 'fake without any reason to prove you are wrong')
