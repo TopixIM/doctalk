@@ -1,6 +1,7 @@
 
 *
   box-sizing border-box
+  -moz-box-sizing border-box
 
 ::-webkit-scrollbar
   width 4px
@@ -111,16 +112,19 @@ input
       background hsl(0,0,80)
       
   #show, #inside
-    padding-bottom 400px
     padding-top 50px
+    padding-bottom 400px
     overflow-x hidden
     overflow-y scroll
+    background hsl(240,40,98)
 
   .unit
     padding 4px 5px
 
     &:nth-child(2n)
-      background hsl(0,0,93)
+      background hsl(240,40,99)
+    &:nth-child(2n+1)
+      background hsl(240,40,97)
 
     .text, .avatar
       vertical-align middle
@@ -133,6 +137,9 @@ input
       width 34px
       height 34px
       box-shadow 0px 0px 4px gray
+
+  .unit.joined
+    font-weight bold
 
   #topic
     background hsl(0,0,90)

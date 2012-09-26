@@ -19,9 +19,14 @@ bind_events = function() {
     }
   });
   $('body').keydown(function(e) {
+    show(e.keyCode);
     if (e.keyCode === 9) {
       e.preventDefault();
       return slide_right();
+    } else if (e.keyCode === 33) {
+      return scroll_view('up');
+    } else if (e.keyCode === 34) {
+      return scroll_view('down');
     }
   });
   $('#type').bind('input', function() {

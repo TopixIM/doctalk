@@ -3,21 +3,30 @@ var add_err, add_post, add_topic, tmpl;
 
 tmpl = {};
 
-tmpl.post = jade.compile(".unit\n   img(src='\#{avatar}',title='\#{name}').avatar\n   span.text(post_id='\#{post_id}')= text");
+tmpl.post = jade.compile(".unit\n   img(src='\#{avatar}',title='\#{name}').avatar\n   span.text(post_id='\#{post_id}',\n    title='\#{time}')= text");
 
-tmpl.topic = jade.compile(".unit(topic_id='\#{topic_id}')\n   img(src='\#{avatar}',title='\#{name}').avatar\n   span.text= text");
+tmpl.topic = jade.compile(".unit(topic_id='\#{topic_id}')\n   img(src='\#{avatar}',title='\#{name}').avatar\n   span.text(title='\#{time}')= text");
 
 tmpl.err = jade.compile(".error\n  span.err-name :(\n  span.err-info= text");
 
 add_post = function(obj) {
-  return $('#show').append(tmpl.post(obj));
+  $('#show').append(tmpl.post(obj));
+  if (!inpage) {
+    notify.posts += 1;
+    return draw_title();
+  }
 };
 
 add_topic = function(obj) {
   $('#inside').append(tmpl.topic(obj));
-  return $('#inside  .unit:last-child').click(function() {
-    return s.emit('goto-topic', obj.topic_id);
+  $('#inside  .unit:last-child').click(function() {
+    s.emit('goto-topic', obj.topic_id);
+    return highlight_joined(obj.topic_id);
   });
+  if (!inpage) {
+    notify.topic += 1;
+    return draw_title();
+  }
 };
 
 add_err = function(obj) {

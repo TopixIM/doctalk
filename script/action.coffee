@@ -16,7 +16,7 @@ focus_type = ->
 slide_right = ->
   left = $('body').scrollLeft()
   screen_width = $(window).width()
-  # show screen_width
+  show screen_width, left
   if left < 10
     $('body').animate scrollLeft: (2000 - screen_width)
   else
@@ -36,10 +36,15 @@ listen_topic = (obj) ->
   add_topic obj
 
 start_topic = (list) ->
-  list.forEach listen_topic
-  end = last list
-  show 'end', end
-  s.emit 'goto-topic', end.topic_id
+  if found list
+    list.forEach listen_topic
+    end = last list
+    # show 'end', end
+    topic_id = end.topic_id
+    s.emit 'goto-topic', topic_id
+    highlight_joined topic_id
+  else
+    add_err text: 'create one topic and refresh..'
 
 start_posts = (list) ->
   $('#show').empty()
@@ -48,10 +53,25 @@ start_posts = (list) ->
 sync_post = (obj) ->
   post_id = obj.post_id
   query = ".unit span[post_id='#{post_id}']"
-  show query
+  # show query
   elem = $(query)
-  show elem
+  # show elem
   if found elem
     elem.text obj.text
   else
     add_post obj
+
+scroll_view = (direc) ->
+  top = $('#show').scrollTop()
+  h = $(window).height() - 200
+  if direc is 'up'
+    $('#show').animate scrollTop: (top - h)
+  else if direc is 'down'
+    $('#show').animate scrollTop: (top + h)
+
+highlight_joined = (topic_id) ->
+  show topic_id
+  query = "#inside .unit[topic_id='#{topic_id}']"
+  $('.joined').removeClass 'joined'
+  $(query).addClass 'joined'
+  # show query, $(query)

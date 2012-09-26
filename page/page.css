@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 ::-webkit-scrollbar {
   width: 4px;
@@ -111,16 +112,20 @@ input {
 }
 #page #show,
 #page #inside {
-  padding-bottom: 400px;
   padding-top: 50px;
+  padding-bottom: 400px;
   overflow-x: hidden;
   overflow-y: scroll;
+  background: #f8f8fc;
 }
 #page .unit {
   padding: 4px 5px;
 }
 #page .unit:nth-child(2n) {
-  background: #ededed;
+  background: #fbfbfd;
+}
+#page .unit:nth-child(2n+1) {
+  background: #f4f4fa;
 }
 #page .unit .text,
 #page .unit .avatar {
@@ -134,6 +139,9 @@ input {
   width: 34px;
   height: 34px;
   box-shadow: 0px 0px 4px #808080;
+}
+#page .unit.joined {
+  font-weight: bold;
 }
 #page #topic {
   background: #e6e6e6;
