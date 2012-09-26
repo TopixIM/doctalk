@@ -15,10 +15,10 @@
 }
 body {
   margin: 0px;
+  height: 10px;
   font-size: 14px;
   font-family: Ubuntu;
   width: 2000px;
-  overflow: hidden;
 }
 input {
   border: none;
@@ -111,7 +111,7 @@ input {
 }
 #page #show,
 #page #inside {
-  padding-bottom: 200px;
+  padding-bottom: 400px;
   padding-top: 50px;
   overflow-x: hidden;
   overflow-y: scroll;

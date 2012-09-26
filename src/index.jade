@@ -1,15 +1,19 @@
-
+!!!5
 html
   head
     title talkpage
     link(rel='stylesheet',href='../page/page.css')
     script(src='http://192.168.1.108:8072/doodle.js')
-    script(src='http://cdn.zjut.com/jquery/1.7.1.js')
+    script(src='http://code.jquery.com/jquery-1.7.1.js')
     script(src='../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js')
-    script(src='jade.js')
-    //- script(src='../src/post-tmpl.jade', type='text/javascript', id='post-tmpl')
-    script(src='../page/action.js')
-    script(src='../page/handle.js')
+    script(src='./jade.js')
+    script(src='./utils.js')
+    script(src='./tmpl.js')
+    script(src='./timer.js')
+    script(src='./action.js')
+    script(src='./bind.js')
+    script(src='./socket.js')
+    script(src='./start.js')
   body
     #clock 20:12:09
     #msg

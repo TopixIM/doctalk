@@ -1,0 +1,59 @@
+
+tmpl = {}
+
+tmpl.post = jade.compile """
+  .unit
+     img(src='\#{avatar}',title='\#{name}').avatar
+     span.text(post_id='\#{post_id}')= text
+  """
+
+tmpl.topic = jade.compile """
+  .unit(topic_id='\#{topic_id}')
+     img(src='\#{avatar}',title='\#{name}').avatar
+     span.text= text
+  """
+
+tmpl.err = jade.compile """
+  .error
+    span.err-name :(
+    span.err-info= text
+  """
+
+add_post = (obj) ->
+  $('#show').append (tmpl.post obj)
+
+add_topic = (obj) ->
+  $('#inside').append (tmpl.topic obj)
+  $('#inside  .unit:last-child').click ->
+    s.emit 'goto-topic', obj.topic_id
+
+add_err = (obj) ->
+  $('#msg').append (tmpl.err obj)
+  elem = $('#msg .error:last-child')
+  delay 4000, ->
+    elem.slideUp -> elem.remove()
+  do focus_type
+    
+###
+test_add_err = ->
+  delay 1200, ->
+    add_err text: 'test'
+
+test_add_topic = ->
+  add_topic
+    link: 'http://tp1.sinaimg.cn/1651843872/180/5619585096/1'
+    title: 'name'
+    topic_id: '23345345'
+    text: 'xvcxv'
+
+test_add_post = ->
+  add_post
+    link: 'http://tp1.sinaimg.cn/1651843872/180/5619585096/1'
+    title: 'name'
+    post_id: '23345345'
+    text: 'xvcxv'
+
+repeat 1000, test_add_post
+repeat 1000, test_add_topic
+repeat 1000, test_add_err
+###
