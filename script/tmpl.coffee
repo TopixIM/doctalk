@@ -3,15 +3,16 @@ tmpl = {}
 
 tmpl.post = jade.compile """
   .unit
-     img(src='\#{avatar}',title='\#{name}').avatar
-     span.text(post_id='\#{post_id}',
-      title='\#{time}')= text
+     img(src='\#{avatar}',title='\#{name}',alt='\#{name}').avatar
+     .content
+       span.text(post_id='\#{post_id}',title='\#{time}')= text
   """
 
 tmpl.topic = jade.compile """
   .unit(topic_id='\#{topic_id}')
-     img(src='\#{avatar}',title='\#{name}').avatar
-     span.text(title='\#{time}')= text
+     img(src='\#{avatar}',title='\#{name}',alt='\#{name}').avatar
+     .content
+       span.text(title='\#{time}')= text
   """
 
 tmpl.err = jade.compile """
@@ -26,7 +27,20 @@ add_post = (obj) ->
     notify.posts += 1
     do draw_title
 
-add_topic = (obj) ->
+prepend_topic = (obj) ->
+  $('#inside').prepend (tmpl.topic obj)
+  $('#inside  .unit:first-child').click ->
+    s.emit 'goto-topic', obj.topic_id
+    highlight_joined obj.topic_id
+
+add_err = (obj) ->
+  $('#msg').append (tmpl.err obj)
+  elem = $('#msg .error:last-child')
+  delay 4000, ->
+    elem.slideUp -> elem.remove()
+  do focus_type
+
+append_topic = (obj) ->
   $('#inside').append (tmpl.topic obj)
   $('#inside  .unit:last-child').click ->
     s.emit 'goto-topic', obj.topic_id
@@ -35,13 +49,6 @@ add_topic = (obj) ->
     notify.topic += 1
     do draw_title
 
-add_err = (obj) ->
-  $('#msg').append (tmpl.err obj)
-  elem = $('#msg .error:last-child')
-  delay 4000, ->
-    elem.slideUp -> elem.remove()
-  do focus_type
-    
 ###
 test_add_err = ->
   delay 1200, ->

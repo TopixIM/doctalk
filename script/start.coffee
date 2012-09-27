@@ -30,4 +30,8 @@ $ ->
     $('#set-avatar').trigger 'input'
     s.emit 'set-avatar', ls.avatar
 
+  unless ls.name? and ls.avatar
+    $('#setting').animate width: '400px'
+    $('#toggle').text '>'
+
   # delay 800, focus_type

@@ -5,8 +5,8 @@ cd `dirname $0`
 jade -O page/ -wP src/*.jade &
 stylus -o page/ -w src/*.styl &
 coffee -o page/ -wb script/*.coffee &
-doodle page/ server.coffee &
 node-dev server.coffee &
+doodle page/ server.coffee &
 
 read
 

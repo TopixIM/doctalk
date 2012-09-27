@@ -13,9 +13,9 @@ s.emit('ready');
 
 s.on('err', add_err);
 
-s.on('create-topic', listen_topic);
+s.on('create-topic', append_topic);
 
-s.on('start-topic', start_topic);
+s.on('show-topic', show_topic);
 
 s.on('goto-topic', start_posts);
 

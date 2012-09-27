@@ -1,6 +1,5 @@
 * {
   box-sizing: border-box;
-  -moz-box-sizing: border-box;
 }
 ::-webkit-scrollbar {
   width: 4px;
@@ -25,7 +24,7 @@ input {
   border: none;
   outline: none;
   box-shadow: 0px 0px 8px #b3b3b3;
-  padding: 4px 8px;
+  padding: 4px;
 }
 #clock {
   position: absolute;
@@ -58,8 +57,8 @@ input {
   height: 100%;
   width: 40px;
   background: #ededed;
-  padding: 40px;
-  box-shadow: -4px 0px 8px #fff;
+  padding: 40px 30px;
+  box-shadow: -4px 0px 8px #ccc;
 }
 #setting .item {
   margin: 10px 0px;
@@ -77,6 +76,13 @@ input {
 #setting #toggle {
   color: #9e9efa;
   cursor: pointer;
+  height: 20px;
+  width: 20px;
+  text-align: center;
+  vertical-align: middle;
+  box-shadow: 0px 0px 10px #808080;
+  border-radius: 10px;
+  margin-bottom: 50px;
 }
 #setting #toggle:hover {
   color: #00f;
@@ -99,56 +105,55 @@ input {
 #page #posts {
   background: #f7f7f7;
 }
-#page #posts #show {
-  height: 100%;
-  width: 100%;
-}
 #page #posts #type {
   height: 20px;
   position: absolute;
   bottom: 0px;
   width: 100%;
-  background: #ccc;
 }
 #page #show,
 #page #inside {
-  padding-top: 50px;
-  padding-bottom: 400px;
+  padding: 60px 0px 400px 0px;
+  margin: 0px;
   overflow-x: hidden;
   overflow-y: scroll;
   background: #f8f8fc;
+  height: 100%;
+  width: 100%;
 }
 #page .unit {
-  padding: 4px 5px;
+  padding: 4px;
+  -webkit-transition-duration: 0.4s;
+  height: 40px;
+  overflow: hidden;
 }
 #page .unit:nth-child(2n) {
-  background: #fbfbfd;
+  background: rgba(240,240,245,0.8);
 }
 #page .unit:nth-child(2n+1) {
-  background: #f4f4fa;
+  background: rgba(246,246,249,0.8);
+}
+#page .unit .content {
+  display: inline-block;
+  width: 640px;
 }
 #page .unit .text,
 #page .unit .avatar {
   vertical-align: middle;
-}
-#page .unit span {
-  margin-left: 12px;
+  display: inline-block;
+  margin-left: 8px;
   white-space: nowrap;
 }
 #page .unit .avatar {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   box-shadow: 0px 0px 4px #808080;
 }
 #page .unit.joined {
-  font-weight: bold;
+  background: #e7e7fe;
 }
 #page #topic {
   background: #e6e6e6;
-}
-#page #topic #inside {
-  width: 100%;
-  height: 100%;
 }
 #page #topic #add {
   position: absolute;

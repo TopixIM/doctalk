@@ -19,7 +19,6 @@ bind_events = function() {
     }
   });
   $('body').keydown(function(e) {
-    show(e.keyCode);
     if (e.keyCode === 9) {
       e.preventDefault();
       return slide_right();
@@ -49,17 +48,28 @@ bind_events = function() {
   });
   $('#set-name').bind('input', set_name);
   $('#set-avatar').bind('input', set_avatar);
-  return $('#toggle').click(function() {
+  $('#toggle').click(function() {
     var width;
     width = $('#setting').width();
     if (width > 40) {
-      return $('#setting').animate({
+      $('#setting').animate({
         width: '40px'
       });
+      return $('#toggle').text('<');
     } else {
-      return $('#setting').animate({
+      $('#setting').animate({
         width: '400px'
       });
+      return $('#toggle').text('>');
+    }
+  });
+  return $('#inside').bind('scroll', function() {
+    var elem, top, topic_id;
+    top = $('#inside').scrollTop();
+    if (top === 0) {
+      elem = $('#inside .unit:first-child');
+      topic_id = elem.attr('topic_id');
+      return s.emit('more-topic', topic_id);
     }
   });
 };

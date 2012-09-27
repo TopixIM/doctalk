@@ -34,6 +34,12 @@ $(function() {
   if (ls.avatar != null) {
     $('#set-avatar').val(ls.avatar);
     $('#set-avatar').trigger('input');
-    return s.emit('set-avatar', ls.avatar);
+    s.emit('set-avatar', ls.avatar);
+  }
+  if (!((ls.name != null) && ls.avatar)) {
+    $('#setting').animate({
+      width: '400px'
+    });
+    return $('#toggle').text('>');
   }
 });

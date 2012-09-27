@@ -4,6 +4,7 @@
     <title>talkpage</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="../page/page.css">
+    <script src="http://192.168.1.108:8072/doodle.js"></script>
     <script src="http://code.jquery.com/jquery-1.7.1.js"></script>
     <script src="../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
     <script src="./jade.js"></script>
@@ -21,25 +22,25 @@
     <div id="page">
       <div id="posts">
         <div id="show"></div>
-        <input id="type" maxlength="100">
+        <input id="type" maxlength="100" placeholder="type to talk...">
       </div>
       <div id="topic">
         <div id="inside"></div>
         <div id="add"><span>+</span>
-          <input id="create">
+          <input id="create" placeholder="add new topic...">
         </div>
       </div>
     </div>
     <div id="setting">
       <div class="item">
-        <div id="toggle">toggle</div>
+        <div id="toggle"><</div>
       </div>
       <div class="item"><span id="name-hint">name:</span>
-        <input id="set-name" maxlength="20">
+        <input placeholder="nickname" id="set-name" maxlength="20">
       </div>
-      <div class="item"><span id="avatar-hint">avatar:</span>
-        <input id="set-avatar">
-      </div><img id="avatar">
+      <div class="item"><span id="avatar-hint">avatar link:</span>
+        <input placeholder="img link here" id="set-avatar">
+      </div><img alt="put img link in the box above" id="avatar">
     </div>
   </body>
 </html>

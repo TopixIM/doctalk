@@ -89,7 +89,10 @@ io.sockets.on 'connection', (s) ->
       post_id: user.post_id
     io.sockets.in(user.topic_id).emit 'sync-post', obj
 
-  db.start_topic s
+  s.on 'more-topic', (topic_id) ->
+    db.more_topic s, topic_id
+
+  db.show_topic s
 
 ###
 test_send = ->

@@ -32,45 +32,46 @@ set_avatar = ->
   $('#avatar').attr 'src', ls.avatar
   s.emit 'set-avatar', ls.avatar
 
-listen_topic = (obj) ->
-  add_topic obj
-
-start_topic = (list) ->
+show_topic = (list) ->
   if found list
-    list.forEach listen_topic
+    list.forEach prepend_topic
     end = last list
     # show 'end', end
     topic_id = end.topic_id
     s.emit 'goto-topic', topic_id
     highlight_joined topic_id
   else
-    add_err text: 'create one topic and refresh..'
+    add_err text: 'all listed'
 
 start_posts = (list) ->
   $('#show').empty()
   list.forEach add_post
 
 sync_post = (obj) ->
-  post_id = obj.post_id
-  query = ".unit span[post_id='#{post_id}']"
-  # show query
-  elem = $(query)
-  # show elem
-  if found elem
-    elem.text obj.text
+  if obj.topic_id?
+    post_id = obj.post_id
+    query = ".unit span[post_id='#{post_id}']"
+    # show query
+    elem = $(query)
+    # show elem
+    if found elem
+      elem.text obj.text
+    else
+      add_post obj
   else
-    add_post obj
+    add_err text: 'topic_id not found..!'
+    add_err text: 'add topic first and click to join!'
 
 scroll_view = (direc) ->
   top = $('#show').scrollTop()
-  h = $(window).height() - 200
+  h = $(window).height() - 100
   if direc is 'up'
-    $('#show').animate scrollTop: (top - h)
+    $('#show').animate scrollTop: (top - h), 100
   else if direc is 'down'
-    $('#show').animate scrollTop: (top + h)
+    $('#show').animate scrollTop: (top + h), 100
 
 highlight_joined = (topic_id) ->
-  show topic_id
+  # show topic_id
   query = "#inside .unit[topic_id='#{topic_id}']"
   $('.joined').removeClass 'joined'
   $(query).addClass 'joined'

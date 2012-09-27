@@ -12,7 +12,7 @@ bind_events = ->
       off
 
   $('body').keydown (e) ->
-    show e.keyCode
+    # show e.keyCode
     if e.keyCode is 9
       e.preventDefault()
       do slide_right
@@ -43,5 +43,14 @@ bind_events = ->
     # show width
     if width > 40
       $('#setting').animate width: '40px'
+      $('#toggle').text '<'
     else
       $('#setting').animate width: '400px'
+      $('#toggle').text '>'
+
+  $('#inside').bind 'scroll', ->
+    top = $('#inside').scrollTop()
+    if top is 0
+      elem = $('#inside .unit:first-child')
+      topic_id = elem.attr 'topic_id'
+      s.emit 'more-topic', topic_id

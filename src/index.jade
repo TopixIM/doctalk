@@ -4,7 +4,7 @@ html
     title talkpage
     meta(charset='utf-8')
     link(rel='stylesheet',href='../page/page.css')
-    //- script(src='http://192.168.1.108:8072/doodle.js')
+    script(src='http://192.168.1.108:8072/doodle.js')
     script(src='http://code.jquery.com/jquery-1.7.1.js')
     script(src='../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js')
     script(src='./jade.js')
@@ -21,20 +21,20 @@ html
     #page
       #posts
         #show
-        input#type(maxlength='100')
+        input#type(maxlength='100',placeholder='type to talk...')
       #topic
         #inside
         #add
           span +
-          input#create
+          input#create(placeholder='add new topic...')
 
     #setting
       .item
-        #toggle toggle
+        #toggle <
       .item
         span#name-hint name:
-        input#set-name(maxlength='20')
+        input(placeholder='nickname')#set-name(maxlength='20')
       .item
-        span#avatar-hint avatar:
-        input#set-avatar
-      img#avatar
+        span#avatar-hint avatar link:
+        input(placeholder='img link here')#set-avatar
+      img(alt='put img link in the box above')#avatar
