@@ -17,7 +17,7 @@ body {
   margin: 0px;
   height: 10px;
   font-size: 14px;
-  font-family: Ubuntu;
+  font-family: Ubuntu, 'microsoft yahei';
   width: 2000px;
 }
 input {
