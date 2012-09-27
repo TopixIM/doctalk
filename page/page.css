@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 ::-webkit-scrollbar {
   width: 4px;

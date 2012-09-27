@@ -63,7 +63,7 @@ bind_events = function() {
       return $('#toggle').text('>');
     }
   });
-  return $('#inside').bind('scroll', function() {
+  $('#inside').bind('scroll', function() {
     var elem, top, topic_id;
     top = $('#inside').scrollTop();
     if (top === 0) {
@@ -72,4 +72,14 @@ bind_events = function() {
       return s.emit('more-topic', topic_id);
     }
   });
+  $('#show').bind('scroll', function() {
+    var elem, post_id, top;
+    top = $('#show').scrollTop();
+    if (top === 0) {
+      elem = $('#show .unit:first-child').find('.text');
+      post_id = elem.attr('post_id');
+      return s.emit('more-posts', post_id);
+    }
+  });
+  return $(window).resize(set_padding);
 };

@@ -35,3 +35,5 @@ $ ->
     $('#toggle').text '>'
 
   # delay 800, focus_type
+
+  do set_padding

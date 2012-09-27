@@ -45,7 +45,7 @@ show_topic = (list) ->
 
 start_posts = (list) ->
   $('#show').empty()
-  list.forEach add_post
+  list.forEach prepend_post
 
 sync_post = (obj) ->
   if obj.topic_id?
@@ -76,3 +76,16 @@ highlight_joined = (topic_id) ->
   $('.joined').removeClass 'joined'
   $(query).addClass 'joined'
   # show query, $(query)
+
+more_posts = (list) ->
+  if found list
+    list.forEach prepend_post
+  else
+    add_err text: 'all posts listed'
+
+set_padding = ->
+  h = $(window).height()
+  h1 = h * 0.3
+  h2 = h * 0.7
+  $('#show').css 'padding', "#{h1}px 0px #{h2}px"
+  $('#inside').css 'padding', "#{h1}px 0px #{h2}px"

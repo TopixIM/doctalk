@@ -40,6 +40,7 @@ $(function() {
     $('#setting').animate({
       width: '400px'
     });
-    return $('#toggle').text('>');
+    $('#toggle').text('>');
   }
+  return set_padding();
 });

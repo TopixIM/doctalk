@@ -54,3 +54,13 @@ bind_events = ->
       elem = $('#inside .unit:first-child')
       topic_id = elem.attr 'topic_id'
       s.emit 'more-topic', topic_id
+
+  $('#show').bind 'scroll', ->
+    top = $('#show').scrollTop()
+    if top is 0
+      elem = $('#show .unit:first-child').find('.text')
+      # show elem
+      post_id = elem.attr 'post_id'
+      s.emit 'more-posts', post_id
+
+  $(window).resize set_padding

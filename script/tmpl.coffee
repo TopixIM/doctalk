@@ -21,7 +21,10 @@ tmpl.err = jade.compile """
     span.err-info= text
   """
 
-add_post = (obj) ->
+prepend_post = (obj) ->
+  $('#show').prepend (tmpl.post obj)
+
+append_post = (obj) ->
   $('#show').append (tmpl.post obj)
   unless inpage
     notify.posts += 1

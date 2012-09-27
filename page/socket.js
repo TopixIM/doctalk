@@ -19,6 +19,8 @@ s.on('show-topic', show_topic);
 
 s.on('goto-topic', start_posts);
 
-s.on('add-post', add_post);
+s.on('add-post', append_post);
 
 s.on('sync-post', sync_post);
+
+s.on('more-posts', more_posts);

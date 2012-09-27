@@ -75,7 +75,6 @@ io.sockets.on 'connection', (s) ->
           topic_id: user.topic_id
           post_id: savetime()
         db.save_post obj
-        # io.sockets.in(user.topic_id).emit 'add-post', obj
         user.post_id = savetime()
 
   s.on 'sync-post', (text) ->
@@ -90,7 +89,13 @@ io.sockets.on 'connection', (s) ->
     io.sockets.in(user.topic_id).emit 'sync-post', obj
 
   s.on 'more-topic', (topic_id) ->
-    db.more_topic s, topic_id
+    if check()
+      db.more_topic s, topic_id
+
+  s.on 'more-posts', (post_id) ->
+    if check()
+      show post_id
+      db.more_posts s, post_id, user.topic_id
 
   db.show_topic s
 
