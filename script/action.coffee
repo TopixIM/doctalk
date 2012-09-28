@@ -57,7 +57,7 @@ sync_post = (obj) ->
     if found elem
       elem.text obj.text
     else
-      add_post obj
+      append_post obj
   else
     add_err text: 'topic_id not found..!'
     add_err text: 'add topic first and click to join!'

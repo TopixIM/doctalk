@@ -79,7 +79,7 @@ sync_post = function(obj) {
     if (found(elem)) {
       return elem.text(obj.text);
     } else {
-      return add_post(obj);
+      return append_post(obj);
     }
   } else {
     add_err({
