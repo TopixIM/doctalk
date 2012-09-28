@@ -11,6 +11,8 @@ s.on 'create-topic', append_topic
 
 s.on 'show-topic', show_topic
 
+s.on 'more-topic', more_topic
+
 s.on 'goto-topic', start_posts
 
 s.on 'add-post', append_post

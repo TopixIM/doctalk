@@ -24,11 +24,15 @@ $ ->
   if ls.name?
     $('#set-name').val ls.name
     s.emit 'set-name', ls.name
+  else
+    s.emit 'set-name', '$null'
 
   if ls.avatar?
     $('#set-avatar').val ls.avatar
     $('#set-avatar').trigger 'input'
     s.emit 'set-avatar', ls.avatar
+  else
+    s.emit 'set-avatar', 'http://tp2.sinaimg.cn/1766492277/50/0/1'
 
   unless ls.name? and ls.avatar
     $('#setting').animate width: '400px'

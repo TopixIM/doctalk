@@ -89,3 +89,9 @@ set_padding = ->
   h2 = h * 0.7
   $('#show').css 'padding', "#{h1}px 0px #{h2}px"
   $('#inside').css 'padding', "#{h1}px 0px #{h2}px"
+
+more_topic = (list) ->
+  if found list
+    list.forEach prepend_topic
+  else
+    add_err text: 'all listed'

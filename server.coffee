@@ -1,6 +1,7 @@
 
 require('./lib/tools')
 require('./lib/config')
+http = require 'http'
 
 db = require './lib/store'
 
@@ -20,12 +21,6 @@ io.sockets.on 'connection', (s) ->
   lasttime = maketime()
 
   check = ->
-    unless user.name?
-      send_err 'no name'
-      return
-    unless user.avatar?
-      send_err  'no avatar'
-      return
     # show lasttime
     # show maketime()
     diff = maketime() - lasttime
@@ -49,11 +44,17 @@ io.sockets.on 'connection', (s) ->
 
   s.on 'set-name', (text) ->
     # show 'set-name'
-    user.name = text
+    text = text.trim()
+    user.name =
+      if text is '' then '$?'
+      else text
 
   s.on 'set-avatar', (link) ->
     # show 'set-avatar'
     user.avatar = link
+    http.get link, (res) ->
+      unless res.statusCode is 200
+        user.avatar = 'http://tp2.sinaimg.cn/1766492277/50/0/1'
 
   s.on 'goto-topic', (topic_id) ->
     s.leave user.topic_id
