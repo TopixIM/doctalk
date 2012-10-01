@@ -85,8 +85,8 @@ more_posts = (list) ->
 
 set_padding = ->
   h = $(window).height()
-  h1 = h * 0.3
-  h2 = h * 0.7
+  h1 = h * 0.2
+  h2 = h * 0.8
   $('#show').css 'padding', "#{h1}px 0px #{h2}px"
   $('#inside').css 'padding', "#{h1}px 0px #{h2}px"
 

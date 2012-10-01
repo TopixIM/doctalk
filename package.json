@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "socket.io": "0.9.x",
-    "mongo-lite": "0.3.x"
+    "mongo-lite": "0.3.x",
+    "coffee-script": "1.x.x"
   }
 }

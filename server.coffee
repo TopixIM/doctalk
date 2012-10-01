@@ -15,7 +15,7 @@ io.sockets.on 'connection', (s) ->
 
   user =
     name: undefined
-    avatar: undefined
+    avatar: 'http://tp2.sinaimg.cn/1766492277/50/0/1'
     topic_id: undefined
     post_id: undefined
   lasttime = maketime()
@@ -52,9 +52,9 @@ io.sockets.on 'connection', (s) ->
   s.on 'set-avatar', (link) ->
     # show 'set-avatar'
     user.avatar = link
-    http.get link, (res) ->
-      unless res.statusCode is 200
-        user.avatar = 'http://tp2.sinaimg.cn/1766492277/50/0/1'
+    # http.get link, (res) ->
+    #   if res.statusCode is 200
+    #     user.avatar = link
 
   s.on 'goto-topic', (topic_id) ->
     s.leave user.topic_id

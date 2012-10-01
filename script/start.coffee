@@ -27,16 +27,16 @@ $ ->
   else
     s.emit 'set-name', '$null'
 
-  if ls.avatar?
+  if ls.avatar? and ls.avatar.length > 0
     $('#set-avatar').val ls.avatar
     $('#set-avatar').trigger 'input'
     s.emit 'set-avatar', ls.avatar
   else
     s.emit 'set-avatar', 'http://tp2.sinaimg.cn/1766492277/50/0/1'
 
-  unless ls.name? and ls.avatar
-    $('#setting').animate width: '400px'
-    $('#toggle').text '>'
+  # unless ls.name? and ls.avatar
+  #   $('#setting').animate width: '400px'
+  #   $('#toggle').text '>'
 
   # delay 800, focus_type
 

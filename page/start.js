@@ -33,18 +33,12 @@ $(function() {
   } else {
     s.emit('set-name', '$null');
   }
-  if (ls.avatar != null) {
+  if ((ls.avatar != null) && ls.avatar.length > 0) {
     $('#set-avatar').val(ls.avatar);
     $('#set-avatar').trigger('input');
     s.emit('set-avatar', ls.avatar);
   } else {
     s.emit('set-avatar', 'http://tp2.sinaimg.cn/1766492277/50/0/1');
-  }
-  if (!((ls.name != null) && ls.avatar)) {
-    $('#setting').animate({
-      width: '400px'
-    });
-    $('#toggle').text('>');
   }
   return set_padding();
 });

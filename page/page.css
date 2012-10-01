@@ -30,15 +30,15 @@ input {
 #clock {
   position: absolute;
   top: 60px;
-  left: 70px;
+  left: 40px;
   font-size: 60px;
   color: #e8e8f7;
 }
 #msg {
   position: absolute;
   top: 140px;
-  left: 70px;
-  width: 300px;
+  left: 40px;
+  width: 280px;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -93,7 +93,7 @@ input {
   position: absolute;
   height: 100%;
   width: 1400px;
-  left: 400px;
+  left: 340px;
   margin-right: 800px;
 }
 #page #posts,
