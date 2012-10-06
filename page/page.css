@@ -104,10 +104,10 @@ input {
   float: left;
 }
 #page #posts #type {
-  height: 20px;
   position: absolute;
-  bottom: 0px;
+  bottom: 20px;
   width: 100%;
+  box-shadow: 0px 0px 20px #999;
 }
 #page #show,
 #page #inside {
@@ -166,9 +166,11 @@ input {
 #page #topic #add #create {
   position: absolute;
   width: 700px;
-  top: 0px;
+  top: -16px;
   right: 0px;
   display: none;
+  box-shadow: 0px 0px 20px #999;
+  height: 26px;
 }
 #page #topic #add span {
   display: inline-block;
