@@ -54,7 +54,7 @@ show_topic = function(list) {
   var end, topic_id;
   if (found(list)) {
     list.forEach(prepend_topic);
-    end = last(list);
+    end = list[0];
     topic_id = end.topic_id;
     s.emit('goto-topic', topic_id);
     return highlight_joined(topic_id);

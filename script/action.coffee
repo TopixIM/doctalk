@@ -35,7 +35,7 @@ set_avatar = ->
 show_topic = (list) ->
   if found list
     list.forEach prepend_topic
-    end = last list
+    end = list[0]
     # show 'end', end
     topic_id = end.topic_id
     s.emit 'goto-topic', topic_id
