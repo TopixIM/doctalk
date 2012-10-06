@@ -89,7 +89,7 @@ input {
   color: #00f;
 }
 #page {
-  background: #e6e6e6;
+  background: #f7f7f7;
   position: absolute;
   height: 100%;
   width: 1400px;
@@ -113,7 +113,6 @@ input {
 #page #inside {
   padding: 60px 0px 400px 0px;
   margin: 0px;
-  float: left;
   overflow-x: hidden;
   overflow-y: scroll;
   height: 100%;
@@ -126,10 +125,10 @@ input {
   overflow: hidden;
 }
 #page .unit:nth-child(2n) {
-  background: rgba(240,240,245,0.8);
+  background: rgba(240,240,245,0.9);
 }
 #page .unit:nth-child(2n+1) {
-  background: rgba(246,246,249,0.8);
+  background: rgba(246,246,249,0.9);
 }
 #page .unit .content {
   display: inline-block;
@@ -148,7 +147,7 @@ input {
   box-shadow: 0px 0px 4px #808080;
 }
 #page .unit.joined {
-  background: #e7e7fe;
+  background: #d8d8fd;
 }
 #page #topic #add {
   position: absolute;

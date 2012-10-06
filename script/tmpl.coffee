@@ -35,6 +35,7 @@ prepend_topic = (obj) ->
   $('#inside  .unit:first-child').click ->
     s.emit 'goto-topic', obj.topic_id
     highlight_joined obj.topic_id
+    do focus_type
 
 add_err = (obj) ->
   $('#msg').append (tmpl.err obj)
@@ -48,6 +49,7 @@ append_topic = (obj) ->
   $('#inside  .unit:last-child').click ->
     s.emit 'goto-topic', obj.topic_id
     highlight_joined obj.topic_id
+    do focus_type
   unless inpage
     notify.topic += 1
     do draw_title

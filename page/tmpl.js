@@ -25,7 +25,8 @@ prepend_topic = function(obj) {
   $('#inside').prepend(tmpl.topic(obj));
   return $('#inside  .unit:first-child').click(function() {
     s.emit('goto-topic', obj.topic_id);
-    return highlight_joined(obj.topic_id);
+    highlight_joined(obj.topic_id);
+    return focus_type();
   });
 };
 
@@ -45,7 +46,8 @@ append_topic = function(obj) {
   $('#inside').append(tmpl.topic(obj));
   $('#inside  .unit:last-child').click(function() {
     s.emit('goto-topic', obj.topic_id);
-    return highlight_joined(obj.topic_id);
+    highlight_joined(obj.topic_id);
+    return focus_type();
   });
   if (!inpage) {
     notify.topic += 1;
