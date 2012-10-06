@@ -10,7 +10,10 @@ tmpl.topic = jade.compile(".unit(topic_id='\#{topic_id}')\n   img(src='\#{avatar
 tmpl.err = jade.compile(".error\n  span.err-name :(\n  span.err-info= text");
 
 prepend_post = function(obj) {
-  return $('#show').prepend(tmpl.post(obj));
+  var elem;
+  $('#show').prepend(tmpl.post(obj));
+  elem = $('#show  .unit:first-child');
+  return elem.hide().slideDown();
 };
 
 append_post = function(obj) {
@@ -22,8 +25,11 @@ append_post = function(obj) {
 };
 
 prepend_topic = function(obj) {
+  var elem;
   $('#inside').prepend(tmpl.topic(obj));
-  return $('#inside  .unit:first-child').click(function() {
+  elem = $('#inside  .unit:first-child');
+  elem.hide().slideDown();
+  return elem.click(function() {
     s.emit('goto-topic', obj.topic_id);
     highlight_joined(obj.topic_id);
     return focus_type();
