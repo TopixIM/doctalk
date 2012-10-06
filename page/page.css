@@ -20,6 +20,8 @@ body {
   font-size: 14px;
   font-family: Ubuntu, 'microsoft yahei';
   width: 2000px;
+  height: 100%;
+  position: absolute;
 }
 input {
   border: none;
