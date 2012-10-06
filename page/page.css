@@ -103,9 +103,6 @@ input {
   position: relative;
   float: left;
 }
-#page #posts {
-  background: #f7f7f7;
-}
 #page #posts #type {
   height: 20px;
   position: absolute;
@@ -116,9 +113,9 @@ input {
 #page #inside {
   padding: 60px 0px 400px 0px;
   margin: 0px;
+  float: left;
   overflow-x: hidden;
   overflow-y: scroll;
-  background: #f8f8fc;
   height: 100%;
   width: 100%;
 }
@@ -153,9 +150,6 @@ input {
 #page .unit.joined {
   background: #e7e7fe;
 }
-#page #topic {
-  background: #e6e6e6;
-}
 #page #topic #add {
   position: absolute;
   bottom: 0px;
@@ -179,4 +173,10 @@ input {
 }
 #page #topic #add span {
   display: inline-block;
+}
+#topic {
+  background: url("../pics/topics.png") no-repeat;
+}
+#posts {
+  background: url("../pics/posts.png") no-repeat;
 }
