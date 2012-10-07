@@ -127,6 +127,10 @@ input {
   height: 40px;
   overflow: hidden;
 }
+#page .unit:first-child,
+#page .unit:last-child {
+  box-shadow: 0px 0px 20px #ccc;
+}
 #page .unit:nth-child(2n) {
   background: rgba(240,240,245,0.9);
 }

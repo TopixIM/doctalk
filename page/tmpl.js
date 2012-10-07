@@ -40,6 +40,7 @@ add_err = function(obj) {
   var elem;
   $('#msg').append(tmpl.err(obj));
   elem = $('#msg .error:last-child');
+  elem.hide().slideDown(200);
   delay(4000, function() {
     return elem.slideUp(function() {
       return elem.remove();
