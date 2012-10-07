@@ -13,7 +13,7 @@ prepend_post = function(obj) {
   var elem;
   $('#show').prepend(tmpl.post(obj));
   elem = $('#show  .unit:first-child');
-  return elem.hide().slideDown();
+  return elem.hide().slideDown(200);
 };
 
 append_post = function(obj) {
@@ -28,7 +28,7 @@ prepend_topic = function(obj) {
   var elem;
   $('#inside').prepend(tmpl.topic(obj));
   elem = $('#inside  .unit:first-child');
-  elem.hide().slideDown();
+  elem.hide().slideDown(200);
   return elem.click(function() {
     s.emit('goto-topic', obj.topic_id);
     highlight_joined(obj.topic_id);

@@ -24,7 +24,7 @@ tmpl.err = jade.compile """
 prepend_post = (obj) ->
   $('#show').prepend (tmpl.post obj)
   elem = $('#show  .unit:first-child')
-  elem.hide().slideDown()
+  elem.hide().slideDown(200)
 
 append_post = (obj) ->
   $('#show').append (tmpl.post obj)
@@ -35,7 +35,7 @@ append_post = (obj) ->
 prepend_topic = (obj) ->
   $('#inside').prepend (tmpl.topic obj)
   elem = $('#inside  .unit:first-child')
-  elem.hide().slideDown()
+  elem.hide().slideDown(200)
   elem.click ->
     s.emit 'goto-topic', obj.topic_id
     highlight_joined obj.topic_id
