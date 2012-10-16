@@ -1,6 +1,6 @@
 
 host = location.host
-s = io.connect "http://#{host}:8000"
+s = io.connect "http://#{host}:8012"
 
 s.on 'ready', -> show 'ready'
 s.emit 'ready'
@@ -20,3 +20,6 @@ s.on 'add-post', append_post
 s.on 'sync-post', sync_post
 
 s.on 'more-posts', more_posts
+
+s.on 'disconnect', ->
+  add_err text: 'lose connection', permanent: yes

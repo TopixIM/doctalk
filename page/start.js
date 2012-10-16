@@ -40,5 +40,12 @@ $(function() {
   } else {
     s.emit('set-avatar', 'http://tp2.sinaimg.cn/1766492277/50/0/1');
   }
+  if (!((ls.name != null) && ls.avatar)) {
+    $('#setting').animate({
+      width: '400px'
+    });
+    $('#toggle').attr('src', '../pics/arrow-right.png');
+  }
+  delay(800, focus_type);
   return set_padding();
 });

@@ -61,7 +61,7 @@ input
   right 0px
   height 100%
   width 40px
-  background hsl(0,0,93)
+  background hsla(0,0,93,0.8)
   padding 40px 30px
   box-shadow -4px 0px 8px hsl(0,0,80)
 
@@ -74,20 +74,15 @@ input
       display inline-block
 
   #avatar
-    width 200px
-    height 200px
-    margin-top 20px
+    width 40px
+    height 40px
+    margin-top 10px
 
   #toggle
     color hsl(240,90,80)
     cursor pointer
     height 20px
     width 20px
-    text-align center
-    vertical-align middle
-    box-shadow 0px 0px 10px gray
-    border-radius 10px
-    margin-bottom 50px
 
     &:hover
       color blue
@@ -131,8 +126,10 @@ input
     height 40px
     overflow hidden
 
-    &:first-child, &:last-child
+    &:first-child
       box-shadow 0px 0px 20px hsl(0,0,80)
+    &:last-child
+      box-shadow 0px 4px 10px hsl(0,0,80)
 
     &:nth-child(2n)
       background hsla(240,20,95,0.9)

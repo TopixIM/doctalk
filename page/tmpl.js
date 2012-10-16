@@ -41,12 +41,14 @@ add_err = function(obj) {
   $('#msg').append(tmpl.err(obj));
   elem = $('#msg .error:last-child');
   elem.hide().slideDown(200);
-  delay(4000, function() {
-    return elem.slideUp(function() {
-      return elem.remove();
+  if (!obj.permanent) {
+    delay(4000, function() {
+      return elem.slideUp(function() {
+        return elem.remove();
+      });
     });
-  });
-  return focus_type();
+    return focus_type();
+  }
 };
 
 append_topic = function(obj) {

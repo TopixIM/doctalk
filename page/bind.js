@@ -55,12 +55,12 @@ bind_events = function() {
       $('#setting').animate({
         width: '40px'
       });
-      return $('#toggle').text('<');
+      return $('#toggle').attr('src', '../pics/arrow-left.png');
     } else {
       $('#setting').animate({
         width: '400px'
       });
-      return $('#toggle').text('>');
+      return $('#toggle').attr('src', '../pics/arrow-right.png');
     }
   });
   $('#inside').bind('scroll', function() {

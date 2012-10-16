@@ -43,10 +43,10 @@ bind_events = ->
     # show width
     if width > 40
       $('#setting').animate width: '40px'
-      $('#toggle').text '<'
+      $('#toggle').attr 'src', '../pics/arrow-left.png'
     else
       $('#setting').animate width: '400px'
-      $('#toggle').text '>'
+      $('#toggle').attr 'src', '../pics/arrow-right.png'
 
   $('#inside').bind 'scroll', ->
     top = $('#inside').scrollTop()

@@ -45,9 +45,10 @@ add_err = (obj) ->
   $('#msg').append (tmpl.err obj)
   elem = $('#msg .error:last-child')
   elem.hide().slideDown(200)
-  delay 4000, ->
-    elem.slideUp -> elem.remove()
-  do focus_type
+  unless obj.permanent
+    delay 4000, ->
+      elem.slideUp -> elem.remove()
+    do focus_type
 
 append_topic = (obj) ->
   $('#inside').append (tmpl.topic obj)
