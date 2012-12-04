@@ -7,18 +7,23 @@ create_topic = ->
   $('#create').fadeOut()
 
 focus_type = ->
-  if $('body').scrollLeft() > 100
-    $('body').animate scrollLeft: 0, ->
-      $('#type').focus()
+  show "focus_type"
+  if ($('body').scrollLeft() + $('html').scrollLeft()) > 100
+    $('body').animate scrollLeft: 0, -> $('#type').focus()
+    $('html').animate scrollLeft: 0, -> $('#type').focus()
   else
     $('#type').focus()
 
 slide_right = ->
-  left = $('body').scrollLeft()
-  screen_width = $(window).width()
+  left = $('body').scrollLeft() + $('html').scrollLeft()
+  show "left", left
+  screen_width = screen.width
   show screen_width, left
   if left < 10
-    $('body').animate scrollLeft: (2000 - screen_width)
+    scroll_end = 2000 - screen_width
+    show "scroll_end", scroll_end
+    $('html').animate scrollLeft: scroll_end
+    $('body').animate scrollLeft: scroll_end
   else
     do focus_type
 

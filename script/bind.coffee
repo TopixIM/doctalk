@@ -14,8 +14,8 @@ bind_events = ->
   $('body').keydown (e) ->
     # show e.keyCode
     if e.keyCode is 9
-      e.preventDefault()
       do slide_right
+      e.preventDefault()
     else if e.keyCode is 33 # pgup
       scroll_view 'up'
     else if e.keyCode is 34 # pgdown
