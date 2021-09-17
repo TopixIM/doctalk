@@ -1,3 +1,10 @@
 
-node_modules/*
-nohup.out
+.compact-inc.cirru
+.calcit-error.cirru
+
+js-out/
+node_modules/
+dist/
+out-page/
+
+yarn-error.log
