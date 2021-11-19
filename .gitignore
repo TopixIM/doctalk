@@ -8,3 +8,6 @@ dist/
 out-page/
 
 yarn-error.log
+
+storage.cirru
+backups/

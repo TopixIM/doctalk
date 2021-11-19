@@ -10,7 +10,7 @@ TODO
 
 ### Workflow
 
-https://github.com/Cumulo/cumulo-workflow.calcit
+https://github.com/Cumulo/calcium-workflow
 
 ### License
 
