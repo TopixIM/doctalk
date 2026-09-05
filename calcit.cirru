@@ -334,7 +334,7 @@
                   =< 8 nil
                   list->
                     {} $ :style ui/row
-                    -> members (.to-list)
+                    -> members (&map:to-list)
                       map $ fn (pair)
                         let[] (k username) pair $ [] k
                           div
@@ -444,13 +444,12 @@
         '*reader-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote (defatom *reader-reel @*reel)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Ref 'cumulo-reel.core/ReelState
         '*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defatom *reel $ merge reel-schema
-              {} (:base @*initial-db) (:db @*initial-db)
+            defatom *reel $ struct-with reel-schema (:base @*initial-db) (:db @*initial-db)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Ref 'cumulo-reel.core/ReelState
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn dispatch! (op op-data sid)
@@ -459,16 +458,21 @@
                   op-time $ -> (get-time!) (.timestamp)
                 if config/dev? $ println |Dispatch! (str op) op-data sid
                 if (= op :effect/persist) (persist-db!)
-                  reset! *reel $ reel-reducer @*reel updater op op-data sid op-id op-time config/dev?
+                  let
+                      action $ case-default op (:: op op-data)
+                        :session/connect $ :: :session/connect
+                        :session/disconnect $ :: :session/disconnect
+                        :user/log-out $ :: :user/log-out op-data
+                    reset! *reel $ reel-reducer @*reel updater action sid op-id op-time config/dev?
           :examples $ []
           :schema $ :: 'Dynamic
         'get-backup-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn get-backup-path! () $ let
-                now $ .extract (get-time!)
+                now $ extract-time (get-time!)
               join-path calcit-dirname |backups
-                str $ :month now
-                str (:day now) |-snapshot.cirru
+                str $ &map:get now :month
+                str (&map:get now :day) |-snapshot.cirru
           :examples $ []
           :schema $ :: 'Dynamic
         'main! $ %{} 'CodeEntry (:doc |)
@@ -476,9 +480,9 @@
             defn main! ()
               println "|Running mode:" $ if config/dev? |dev |release
               let
-                  port $ parse-float
-                    option:unwrap-or (get-env |port)
-                      str $ :port config/site
+                  port $ option:unwrap-or
+                    option:map (get-env |port) parse-float
+                    &map:get config/site :port
                 run-server! port
                 println $ str "|Server started on port:" port
               do (; "|init it before doing multi-threading") (identity @*reader-reel)
@@ -531,8 +535,8 @@
                     (:message sid msg)
                       let
                           action $ parse-cirru-edn msg
-                        case-default (:kind action) (println "|unknown action:" action)
-                          :op $ dispatch! (:op action) (:data action) sid
+                        case-default (&map:get action :kind) (println "|unknown action:" action)
+                          :op $ dispatch! (&map:get action :op) (&map:get action :data) sid
                     (:disconnect sid)
                       do (println "|Client closed!") (dispatch! :session/disconnect nil sid)
                     _ $ println "|unknown data:" data
@@ -541,8 +545,8 @@
         'storage-file $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def storage-file $ if (empty? calcit-dirname)
-              str calcit-dirname $ :storage-file config/site
-              str calcit-dirname |/ $ :storage-file config/site
+              str calcit-dirname $ &map:get config/site :storage-file
+              str calcit-dirname |/ $ &map:get config/site :storage-file
           :examples $ []
           :schema $ :: 'Dynamic
         'sync-clients! $ %{} 'CodeEntry (:doc |)
@@ -566,7 +570,9 @@
                       swap! *client-caches assoc sid new-store
               finish-twig-frame!
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'cumulo-reel.core/ReelState
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns app.server $ :require (app.schema :as schema)
@@ -581,7 +587,7 @@
             app.$meta :refer $ calcit-dirname
             calcit.std.fs :refer $ path-exists? check-write-file!
             calcit.std.time :refer $ set-interval
-            calcit.std.date :refer $ Date get-time!
+            calcit.std.date :refer $ Date get-time! get-timestamp extract-time
             calcit.std.path :refer $ join-path
     'app.twig.container $ %{} 'FileEntry
       :defs $ {}
@@ -589,32 +595,34 @@
           :code $ quote
             defn twig-container (db session records)
               let
-                  logged-in? $ some? (:user-id session)
-                  router $ :router session
-                  base-data $ {} (:logged-in? logged-in?) (:session session)
+                  session-map $ unsafe-coerce (option:unwrap-or session {}) 'Map
+                  logged-in? $ some? (&map:get session-map :user-id)
+                  router $ unsafe-coerce (&map:get session-map :router) 'Map
+                  base-data $ {} (:logged-in? logged-in?) (:session session-map)
                     :reel-length $ count records
                 merge base-data $ if logged-in?
                   {}
-                    :user $ memof1-call twig-user
-                      get-in db $ [] :users (:user-id session)
+                    :user $ twig-user
+                      option:unwrap-or
+                        get-in db $ [] :users (&map:get session-map :user-id)
+                        , {}
                     :router $ assoc router :data
-                      case (:name router)
-                        :home $ :pages db
-                        :profile $ memof1-call twig-members (:sessions db) (:users db)
-                        (:name router) ({})
-                    :count $ count (:sessions db)
+                      case-default (&map:get router :name) ({})
+                        :home $ &map:get db :pages
+                        :profile $ twig-members (&map:get db :sessions) (&map:get db :users)
+                    :count $ count (&map:get db :sessions)
                     :color $ rand-hex-color!
-                  {}
+                  , nil
           :examples $ []
           :schema $ :: 'Dynamic
         'twig-members $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn twig-members (sessions users)
-              -> sessions (.to-list)
-                map $ fn (pair)
-                  let[] (k session) pair $ [] k
-                    get-in users $ [] (:user-id session) :name
-                pairs-map
+              -> sessions (&map:to-list)
+                .map-pair $ fn (k session)
+                  [] k $ option:unwrap-or
+                    get-in users $ [] (&map:get session :user-id) :name
+                    , |
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -622,7 +630,6 @@
           ns app.twig.container $ :require
             app.twig.user :refer $ twig-user
             calcit.std.rand :refer $ rand-hex-color!
-            memof.once :refer $ memof1-call
     'app.twig.user $ %{} 'FileEntry
       :defs $ {}
         'twig-user $ %{} 'CodeEntry (:doc |)
@@ -637,21 +644,16 @@
       :defs $ {}
         'updater $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defn updater (db op op-data sid op-id op-time)
-              let
-                  session $ get-in db ([] :sessions sid)
-                  user $ if (some? session)
-                    get-in db $ [] :users (:user-id session)
-                  f $ case-default op
-                    fn (& args) (println "|Unknown op:" op) db
-                    :session/connect session/connect
-                    :session/disconnect session/disconnect
-                    :session/remove-message session/remove-message
-                    :user/log-in user/log-in
-                    :user/sign-up user/sign-up
-                    :user/log-out user/log-out
-                    :router/change router/change
-                f db op-data sid op-id op-time
+            defn updater (db op sid op-id op-time)
+              match op
+                (:session/connect) (session/connect db nil sid op-id op-time)
+                (:session/disconnect) (session/disconnect db nil sid op-id op-time)
+                (:session/remove-message op-data) (session/remove-message db op-data sid op-id op-time)
+                (:user/log-in op-data) (user/log-in db op-data sid op-id op-time)
+                (:user/sign-up op-data) (user/sign-up db op-data sid op-id op-time)
+                (:user/log-out op-data) (user/log-out db op-data sid op-id op-time)
+                (:router/change op-data) (router/change db op-data sid op-id op-time)
+                _ $ do (eprintln "|Unknown op:" op) db
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -688,7 +690,7 @@
             defn remove-message (db op-data sid op-id op-time)
               update-in db ([] :sessions sid :messages)
                 fn (messages)
-                  dissoc messages $ :id op-data
+                  dissoc (option:unwrap-or messages {}) (&map:get op-data :id)
           :examples $ []
           :schema $ :: 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
@@ -696,25 +698,38 @@
           ns app.updater.session $ :require (app.schema :as schema)
     'app.updater.user $ %{} 'FileEntry
       :defs $ {}
+        'as-user-map $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn as-user-map (user) (unsafe-coerce user 'Map)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'Map)
+              :args $ [] 'Dynamic
         'log-in $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn log-in (db op-data sid op-id op-time)
               let-sugar
                     [] username password
                     , op-data
-                  maybe-user $ -> (:users db) (vals) (.to-list)
+                  maybe-user $ -> (&map:get db :users) (vals) (.to-list)
                     find $ fn (user)
-                      and $ = username (:name user)
+                      and $ = username
+                        &map:get (as-user-map user) :name
                 update-in db ([] :sessions sid)
                   fn (session)
-                    if (some? maybe-user)
+                    if (option:some? maybe-user)
                       if
-                        = (md5 password) (:password maybe-user)
-                        assoc session :user-id $ :id maybe-user
-                        update session :messages $ fn (messages)
+                        = (md5 password)
+                          &map:get
+                            as-user-map $ option:unwrap maybe-user
+                            , :password
+                        assoc (option:unwrap-or session {}) :user-id $ &map:get
+                          as-user-map $ option:unwrap maybe-user
+                          , :id
+                        update (option:unwrap-or session {}) :messages $ fn (messages)
                           assoc messages op-id $ {} (:id op-id)
                             :text $ str "|Wrong password for " username
-                      update session :messages $ fn (messages)
+                      update (option:unwrap-or session {}) :messages $ fn (messages)
                         assoc messages op-id $ {} (:id op-id)
                           :text $ str "|No user named: " username
           :examples $ []
@@ -732,13 +747,13 @@
                     [] username password
                     , op-data
                   maybe-user $ find
-                    vals $ :users db
+                    -> (&map:get db :users) vals .to-list
                     fn (user)
-                      = username $ :name user
-                if (some? maybe-user)
+                      = username $ &map:get (as-user-map user) :name
+                if (option:some? maybe-user)
                   update-in db ([] :sessions sid :messages)
                     fn (messages)
-                      assoc messages op-id $ {} (:id op-id)
+                      assoc (option:unwrap-or messages {}) op-id $ {} (:id op-id)
                         :text $ str "|Name is taken: " username
                   -> db
                     assoc-in ([] :sessions sid :user-id) op-id
