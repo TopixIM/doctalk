@@ -1,17 +1,18 @@
 {
+  "packageManager": "yarn@4.12.0",
   "dependencies": {
-    "@calcit/procs": "^0.6.20",
+    "@calcit/procs": "0.13.77",
     "shortid": "^2.2.16"
   },
   "scripts": {
-    "compile-page": "cr --emit-js --once",
+    "compile-page": "calcit calcit.cirru js",
     "release-page": "vite build --base=./",
-    "watch-page": "cr --emit-js/"
+    "watch-page": "calcit calcit.cirru js --watch"
   },
   "devDependencies": {
     "bottom-tip": "^0.1.3",
     "url-parse": "^1.5.10",
-    "vite": "^4.0.4"
+    "vite": "^8.2.2"
   },
   "version": "0.0.1"
 }
