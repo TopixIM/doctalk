@@ -27,13 +27,17 @@ jobs:
         corepack prepare yarn@4.12.0 --activate
         yarn --version
 
-    - uses: calcit-lang/setup-calcit@704b3f5cd6f9ce3bd1e0c926dbdd1d181adb8180 # v1
+    - name: Set up Calcit 0.14.17 and Caps
+      uses: calcit-lang/setup-calcit@d02594b15f0e9de723fe1a202a3fa62a87afe07b # v1.4.0
+      with:
+        version: 0.14.17
+        tools: calcit,caps
 
     - name: Install dependencies
       run: |
-        caps --ci
+        caps --calcit-version 0.14.17 --strict --ci
         yarn install --immutable
-        caps verify --toolchain
+        caps --calcit-version 0.14.17 verify --toolchain
 
     - name: Validate Calcit entries
       run: |
@@ -42,6 +46,9 @@ jobs:
         calcit calcit.cirru --check-only
         calcit calcit.cirru --entry server --check-only
         calcit calcit.cirru analyze deprecated --summary-only --format json
+        calcit calcit.cirru --entry server analyze deprecated --summary-only --format json
+        calcit calcit.cirru analyze dynamic-methods --max 0
+        calcit calcit.cirru --entry server analyze dynamic-methods --max 0
 
     - name: Build browser client
       run: yarn compile-page && yarn release-page
