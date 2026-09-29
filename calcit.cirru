@@ -3,11 +3,11 @@
   :about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --contract` before mutations; use `--full` for first orientation or changed contract digest. Manual edits must follow format and schema conventions, then run `calcit edit format`."
   :package |app
   :entries $ {}
-    :default $ {} (:description |) (:init-fn 'app.client/main!) (:mode :js) (:reload-fn 'app.client/reload!)
+    :default $ {} (:description |) (:init-fn 'app.client/main!) (:mode :js) (:reload-fn 'app.client/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |lilac/ |recollect/ |memof/ |respo-ui.calcit/ |ws-edn.calcit/ |cumulo-util.calcit/ |respo-message.calcit/ |cumulo-reel.calcit/
       :type-slots $ {}
-    :server $ {} (:description |) (:init-fn 'app.server/main!) (:mode :native) (:reload-fn 'app.server/reload!)
+    :server $ {} (:description |) (:init-fn 'app.server/main!) (:mode :native) (:reload-fn 'app.server/reload!) (:target :native)
       :feature-policy $ {}
       :modules $ [] |lilac/ |recollect/ |memof/ |cumulo-util.calcit/ |cumulo-reel.calcit/ |calcit.std/ |calcit-wss/
       :type-slots $ {}
@@ -144,7 +144,7 @@
               if (js-present? raw)
                 do (println "|Found storage.")
                   dispatch! :user/log-in $ parse-cirru-edn $ unsafe-coerce raw String
-                do $ println "|Found no storage."
+                println "|Found no storage."
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -458,7 +458,7 @@
         'read-field $ %{} 'CodeEntry
           :doc "|Read a field from an open map or nominal struct boundary."
           :code $ quote $ defn read-field (value field)
-            if (struct? value) (&struct:get value field) (&map:get value field)
+            option:unwrap-or (get value field) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Tag
@@ -552,7 +552,8 @@
                   , default-port
               run-server! port
               println $ str "|Server started on port:" port
-            do (; "|init it before doing multi-threading") (identity @*reader-reel)
+            ; "|init it before doing multi-threading"
+            identity @*reader-reel
             set-interval 200 $ fn () $ render-loop!
             set-interval 600000 $ fn () $ persist-db!
             on-control-c on-exit!
@@ -586,12 +587,11 @@
             :args $ []
         'render-loop! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-loop! ()
-            do
-              when
-                not $ identical? @*reader-reel @*reel
-                reset! *reader-reel @*reel
-                sync-clients! @*reader-reel
-              , &unit
+            when
+              not $ identical? @*reader-reel @*reel
+              reset! *reader-reel @*reel
+              sync-clients! @*reader-reel
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -627,7 +627,7 @@
                   db $ :db reel
                   records $ :records reel
                   session $ get-in db $ [] :sessions sid
-                  old-store $ or (get @*client-caches sid) nil
+                  old-store $ option:unwrap-or (get @*client-caches sid) nil
                   new-store $ twig-container db session records
                   changes $ diff-twig old-store new-store $ {} (:key :id)
                 ; when config/dev? $ println "|Changes for" sid |: changes $ count records
@@ -674,7 +674,7 @@
                 if logged-in?
                   let
                       user $ unsafe-coerce
-                        or
+                        option:unwrap-or
                           get-in db-map $ [] :users user-id
                           {}
                         :: 'Map 'Tag 'Dynamic
@@ -698,7 +698,7 @@
               unsafe-coerce sessions $ :: 'Map 'Number 'Dynamic
               &map:to-list
               map $ fn (pair)
-                let[] (k session) pair $ [] k $ or
+                let[] (k session) pair $ [] k $ option:unwrap-or
                   get-in users $ []
                     &map:get
                       unsafe-coerce session $ :: 'Map 'Tag 'Dynamic
