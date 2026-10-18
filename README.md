@@ -12,11 +12,11 @@ TODO
 
 https://github.com/Cumulo/calcium-workflow
 
-当前本地迁移候选固定已发布的 Calcit / `@calcit/procs` 0.30.1-alpha.4（预发布）、
+当前迁移候选固定已发布的 Calcit / `@calcit/procs` 0.30.1-alpha.5（预发布）、
 Caps 0.1.1、Node 24、Yarn 4.18.0。模块改用已共同验收的精确正式依赖图，不使用 hash、浮动 main
 或旧 Respo/UI alpha；未被任何应用代码或 namespace import 消费的 Lilac 已移除。
-**源码迁移尚未完成，当前候选不能部署。** alpha.5 的发布链路已完成；本候选仍保留已验收的
-alpha.4 配对，下一阶段再单独验证新 CLI / runtime，不单边更新。
+这是预发布工具链迁移，不代表 0.30.1 正式版。alpha.5 经 Yarn 原有 60 分钟隔离期后正常安装，
+未添加白名单或降低安全设置。**未经后端环境验收，不应合并部署。**
 
 ```sh
 caps --strict --ci
@@ -24,7 +24,7 @@ yarn install --immutable
 caps verify --toolchain
 yarn check-client
 yarn check-server
-calcit calcit.cirru test --require-match --summary-only
+calcit calcit.cirru --entry server test --require-match --summary-only
 calcit fix --workflow strict --verify --format edn
 yarn compile-page
 VITE_BASE_URL=https://cos-sh.tiye.me/TopixIM/doctalk/ yarn release-page
@@ -50,8 +50,10 @@ CI 保留现有 strict workflow 检查，并按 browser/native 两个入口检�
 旧模块源码 HEAD/干净状态已对照原解析记录核实；本地未运行 Caps，也不把旧 native realization
 当作新工具链的干净安装验收。
 
-站点配置和登录/容器本地状态已改为真实 Struct；原配置值、存储文件、Map 状态、用户名/密码
-List 和 WebSocket envelope 保持不变。网络 patch 使用 Recollect 自带 `decode-changes` 重新建立
+站点配置、登录/容器本地状态及服务端 User / Session / Database / Credentials 已改为真实 Struct，
+内部操作使用 ServerOp；原配置值、存储文件、Map 状态、用户名/密码 List 和 WebSocket envelope
+保持不变。存档解码与编码保留未知扩展字段，内部 Option 在原协议中仍编码为 nil；缺失的可选
+字段会规范化为 nil，错误字段类型会拒绝，而不是继续以未检查的值运行。网络 patch 使用 Recollect 自带 `decode-changes` 重新建立
 EDN 往返后的名义类型，不再强转；未知消息仍忽略。游客缺失的计数/颜色在视图中明确使用 Option，
 Respo 游标保留合法的混合键，不伪装成纯 Tag Map。
 
@@ -59,15 +61,24 @@ Respo 游标保留合法的混合键，不伪装成纯 Tag Map。
 [Calcit #2166](https://github.com/calcit-lang/calcit/issues/2166)。现有 imports 不作多余改写；
 build-errors 路径对齐生成器实际输出的 `.mjs`，watcher 使用带 `!` 的当前接口。
 
-当前 browser253/253 可达定义及全部8个自有前端 namespace（38/38定义）通过；两条定义附带
-native 回归通过，配对 JS 生成、Vite 构建，以及实际生成代码的视图/输入/序列化 patch 回放通过。
+当前 browser252/252、native72/72 可达定义及全部自有前端/服务端 namespace（分别50/50、55/55
+定义，含共享定义）通过；完整 strict 为0诊断、0迁移建议。4条定义附带 native 回归覆盖状态解码、
+旧存档往返、账户/session操作和真实 Reel 历史回放；没有新增测试框架或维护独立验证脚本。
+配对 JS 生成、Vite 构建，以及实际生成代码的视图/输入/序列化 patch 回放通过。
 临时 Node 回放使用现有 Vite 打包浏览器依赖，不声称原始浏览器模块可直接由 Node 加载；也不是
-浏览器端到端、WebSocket 服务或生产验收。临时入口、产物及脚本均不纳入仓库。
+完整浏览器端到端或生产验收。另已在隔离临时存档与仅回环绑定的原生服务上，实际通过浏览器
+WebSocket 接收匿名 session 并呈现登录界面；未执行浏览器注册/自动登录验收。当前生成的 JS
+另通过存档往返、已解码 Credentials 的再次回放和错误存档拒绝。临时入口、产物及脚本均不纳入仓库。
 
-原生端仍为63通过、1失败、7阻塞、1级联。Reel 已按数据库 Map 实例化，并在历史记录回放边界
-检查 sid/id/time；完整数据库、session、user、twig/updater 类型仍须加强和验收。弱类型扫描仍有
-28个定义的51处 schema Dynamic，未放宽任何基线或声称类型债务清零。尚未提交 PR、启动业务
-后端、合并或部署生产。
+Reel 按 Database 实例化；回放边界检查操作、sid/id/time，并兼容旧匿名操作与已解码的凭据 Struct。
+所有自有 unsafe-coerce / assert-type 已移除，旧 atom/watch/Option 构造写法已迁移；不把依赖内部
+计入此结论。弱类型扫描仍有32个定义的42处 schema Dynamic（包括存档/网络边界、扩展字段、
+异构 UI 状态、Reel 历史和模块接口）；unresolved type slot 与 unsafe-coerce 均为0。未放宽任何
+基线或声称 Dynamic 债务清零。原 md5 认证和密码输入行为未在这次类型迁移中重设计。
+
+浏览器 URL 解析改用已有 js-ffi 标准接口，正常、空值、重复参数和 Unicode 共9例与原库相符；
+畸形 URL 编码按浏览器标准处理，可能与旧库静默丢弃参数的行为不同。未使用的 shortid / url-parse
+及其间接依赖已删除。未启动业务后端、合并或部署生产；本地没有执行 Caps，干净依赖安装由 CI 验证。
 
 ### License
 
