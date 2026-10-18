@@ -51,6 +51,7 @@ jobs:
         git diff --exit-code -- calcit.cirru
         yarn check-client
         yarn check-server
+        calcit calcit.cirru test --require-match --summary-only
 
     - name: Build client with CDN asset URLs
       id: asset-path

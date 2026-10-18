@@ -37,8 +37,8 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ :: 'Trait
         'connect! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn connect! () $ let
+          :code $ quote $ defn connect! ()
+            let
                 location $ unsafe-coerce js/location 'js-ffi.browser/LocationHost
                 url-obj $ unsafe-coerce
                   url-parse (.-href location) true
@@ -47,7 +47,7 @@
                 raw-host $ .-host query
                 raw-port $ .-port query
                 host $ if (js-present? raw-host) (unsafe-coerce raw-host String) (.-hostname location)
-                port $ if (js-present? raw-port) (unsafe-coerce raw-port String) (&map:get config/site :port)
+                port $ if (js-present? raw-port) (unsafe-coerce raw-port String) (:port config/site)
               ws-connect! (str |ws:// host |: port)
                 {}
                   :on-open $ fn (event) (simulate-login!)
@@ -71,18 +71,17 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Tag 'Dynamic
         'dispatch-action! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn dispatch-action! (action)
-              match action
-                (:states cursor state)
-                  dispatch! :states $ [] cursor state
-                (:effect/connect) (dispatch! :effect/connect nil)
-                (:session/remove-message data) (dispatch! :session/remove-message data)
-                (:user/log-in data) (dispatch! :user/log-in data)
-                (:user/sign-up data) (dispatch! :user/sign-up data)
-                (:user/log-out) (dispatch! :user/log-out nil)
-                (:router/change data) (dispatch! :router/change data)
-                _ $ println "|Unknown client action:" action
+          :code $ quote $ defn dispatch-action! (action)
+            match action
+              (:states cursor state)
+                dispatch! :states $ [] cursor state
+              (:effect/connect) (dispatch! :effect/connect nil)
+              (:session/remove-message data) (dispatch! :session/remove-message data)
+              (:user/log-in data) (dispatch! :user/log-in data)
+              (:user/sign-up data) (dispatch! :user/sign-up data)
+              (:user/log-out) (dispatch! :user/log-out nil)
+              (:router/change data) (dispatch! :router/change data)
+              _ $ println "|Unknown client action:" action
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
@@ -99,20 +98,19 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
         'mount-target $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn mount-target () $ unsafe-coerce (.?!querySelector js/document |.app) (quote JsObject)
+          :code $ quote $ defn mount-target ()
+            unsafe-coerce (.?!querySelector js/document |.app) (quote JsObject)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'JsObject)
             :args $ []
             :features $ #{} :js-ffi
         'on-server-data $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn on-server-data (data)
-              case-default (&map:get data :kind) (println "|unknown server data kind:" data)
-                :patch $ let
-                    changes $ unsafe-coerce (&map:get data :data) (:: 'List 'recollect.schema/change-op)
-                  when config/dev? $ js/console.log |Changes $ to-js-data changes
-                  reset! *store $ patch-twig @*store changes
+          :code $ quote $ defn on-server-data (data)
+            case-default (&map:get data :kind) (println "|unknown server data kind:" data)
+              :patch $ let
+                  changes $ unsafe-coerce (&map:get data :data) (:: 'List 'recollect.schema/change-op)
+                when config/dev? $ js/console.log |Changes $ to-js-data changes
+                reset! *store $ patch-twig @*store changes
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] $ :: 'Map 'Tag 'Dynamic
@@ -140,7 +138,7 @@
         'simulate-login! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn simulate-login! ()
             let
-                raw $ js/localStorage.getItem $ &map:get config/site :storage-key
+                raw $ js/localStorage.getItem $ :storage-key config/site
               if (js-present? raw)
                 do (println "|Found storage.")
                   dispatch! :user/log-in $ parse-cirru-edn $ unsafe-coerce raw String
@@ -213,12 +211,12 @@
           :code $ quote $ defcomp comp-offline ()
             div
               {} $ :style $ merge ui/global ui/fullscreen ui/column-dispersive
-                {} $ :background-color $ &map:get config/site :theme
+                {} $ :background-color $ :theme config/site
               div $ {} $ :style
                 {} $ :height 0
               div $ {} $ :style
                 {}
-                  :background-image $ str "|url(" (&map:get config/site :icon) "|)"
+                  :background-image $ str "|url(" (:icon config/site) "|)"
                   :width 128
                   :height 128
                   :background-size :contain
@@ -258,11 +256,17 @@
             app.config :as config
     'app.comp.login $ %{} 'FileEntry
       :defs $ {}
+        'LoginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct LoginState (:username 'String) (:password 'String)
+          :examples $ []
+          :schema $ :: 'StructDef
         'comp-login $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-login (states)
             let
-                cursor $ &map:get states :cursor
-                state $ or (&map:get states :data) initial-state
+                cursor $ decode-map-as
+                  option:unwrap-or (get states :cursor) nil
+                  :: 'Optional $ :: 'List 'Dynamic
+                state $ read-login-state states
               div
                 {} $ :style $ merge ui/flex ui/center
                 div ({})
@@ -270,37 +274,46 @@
                     {} $ :style $ {}
                     div ({})
                       input $ {} (:placeholder |Username)
-                        :value $ &map:get state :username
+                        :value $ :username state
                         :style ui/input
                         :on-input $ fn (e d!)
-                          d! $ :: :states cursor $ assoc state :username
-                            str $ option:unwrap-or (get e :value) |
+                          hint-fn $ {} (:return 'Unit)
+                            :args $ [] (:: 'Map 'Tag 'Dynamic)
+                              :: 'Fn $ {} (:return 'Unit)
+                                :args $ [] 'Enum
+                          d! $ :: :states cursor $ {}
+                            :username $ str $ option:unwrap-or (get e :value) |
+                            :password $ :password state
                     =< nil 8
                     div ({})
                       input $ {} (:placeholder |Password)
-                        :value $ &map:get state :password
+                        :value $ :password state
                         :style ui/input
                         :on-input $ fn (e d!)
-                          d! $ :: :states cursor $ assoc state :password
-                            str $ option:unwrap-or (get e :value) |
+                          hint-fn $ {} (:return 'Unit)
+                            :args $ [] (:: 'Map 'Tag 'Dynamic)
+                              :: 'Fn $ {} (:return 'Unit)
+                                :args $ [] 'Enum
+                          d! $ :: :states cursor $ {}
+                            :username $ :username state
+                            :password $ str $ option:unwrap-or (get e :value) |
                   =< nil 8
                   div
                     {} $ :style $ {} (:text-align :right)
                     span $ {} (:inner-text "|Sign up")
                       :style $ merge ui/link
-                      :on-click $ on-submit (&map:get state :username) (&map:get state :password) true
+                      :on-click $ on-submit (:username state) (:password state) true
                     =< 8 nil
                     span $ {} (:inner-text "|Log in")
                       :style $ merge ui/link
-                      :on-click $ on-submit (&map:get state :username) (&map:get state :password) false
+                      :on-click $ on-submit (:username state) (:password state) false
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
             :args $ [] $ :: 'Map 'Tag 'Dynamic
         'initial-state $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def initial-state
-            {} (:username |) (:password |)
+          :code $ quote $ def initial-state (LoginState :username | :password |)
           :examples $ []
-          :schema $ :: 'Map 'Tag 'String
+          :schema $ :: 'app.comp.login/LoginState
         'on-submit $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-submit (username password signup?)
             fn (e dispatch!)
@@ -312,15 +325,33 @@
           :schema $ :: 'Fn $ {} (:return 'respo.schema/EventHandler)
             :args $ [] 'String 'String 'Bool
         'persist-login! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn persist-login! (username password)
-              js/localStorage.setItem (&map:get config/site :storage-key)
-                format-cirru-edn $ [] username password
-              , &unit
+          :code $ quote $ defn persist-login! (username password)
+            js/localStorage.setItem (:storage-key config/site)
+              format-cirru-edn $ [] username password
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'String 'String
             :features $ #{} :js-ffi
+        'read-login-state $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn read-login-state (states)
+            match (get states :data)
+              (:some raw-state)
+                if (nil? raw-state) initial-state $ decode-map-as raw-state 'app.comp.login/LoginState
+              (:none) initial-state
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'app.comp.login/LoginState)
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
+          :tests $ [] $ %{} 'TestEntry (:name |missing-null-and-stored-credentials)
+            :code $ quote $ do
+              assert= initial-state $ read-login-state $ {}
+              assert= initial-state $ read-login-state $ {} (:data nil)
+              let
+                  state $ read-login-state $ {}
+                    :data $ {} (:username "|迁移用户🐈") (:password |secret031)
+                assert= "|迁移用户🐈" $ :username state
+                assert= |secret031 $ :password state
+            :tags $ #{} :unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.login
           :require
@@ -344,7 +375,7 @@
                   :on-click $ fn (e d!)
                     d! $ :: :router/change $ {} (:name :home)
                   :style $ {} $ :cursor :pointer
-                <> (&map:get config/site :title) nil
+                <> (:title config/site) nil
               div
                 {}
                   :style $ {} $ :cursor |pointer
@@ -402,23 +433,21 @@
                     :style $ merge ui/button $ {} (:color :red) (:border-color :red)
                     :on-click $ fn (e dispatch!)
                       dispatch! $ :: :user/log-out
-                      remove-storage! $ str $ &map:get config/site :storage-key
+                      remove-storage! $ str $ :storage-key config/site
                   <> "|Log out"
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
             :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'Map 'Number 'Dynamic)
         'refresh-location! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn refresh-location! ()
-              js/location.replace $ str js/location.origin |?time= $ .now js/Date
-              , &unit
+          :code $ quote $ defn refresh-location! ()
+            js/location.replace $ str js/location.origin |?time= $ .now js/Date
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
         'remove-storage! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $
-            defn remove-storage! (storage-key) (js/localStorage.removeItem storage-key) &unit
+          :code $ quote $ defn remove-storage! (storage-key) (js/localStorage.removeItem storage-key) &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'String
@@ -441,13 +470,17 @@
           :schema $ :: 'Bool
         'site $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def site
-            {} (:port 5021) (:title |Cumulo) (:icon |http://cdn.tiye.me/logo/cumulo.png) (:theme |#eeeeff) (:storage-key |workflow-storage-calcit) (:storage-file |storage.cirru)
+            app.schema/SiteConfig :port 5021 :title |Cumulo :icon |http://cdn.tiye.me/logo/cumulo.png :theme |#eeeeff :storage-key |workflow-storage-calcit :storage-file |storage.cirru
           :examples $ []
-          :schema $ :: 'Map 'Tag 'Dynamic
+          :schema $ :: 'app.schema/SiteConfig
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.config
     'app.schema $ %{} 'FileEntry
       :defs $ {}
+        'SiteConfig $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct SiteConfig (:port 'Number) (:title 'String) (:icon 'String) (:theme 'String) (:storage-key 'String) (:storage-file 'String)
+          :examples $ []
+          :schema $ :: 'StructDef
         'database $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def database
             {}
@@ -541,7 +574,7 @@
           :code $ quote $ defn main! ()
             println "|Running mode:" $ if config/dev? |dev |release
             let
-                default-port $ assert-type (&map:get config/site :port) 'Number
+                default-port $ :port config/site
                 port $ option:unwrap-or
                   option:map (get-env |port)
                     fn (text)
@@ -616,8 +649,8 @@
         'storage-file $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def storage-file
             if (empty? calcit-dirname)
-              str calcit-dirname $ &map:get config/site :storage-file
-              str calcit-dirname |/ $ &map:get config/site :storage-file
+              str calcit-dirname $ :storage-file config/site
+              str calcit-dirname |/ $ :storage-file config/site
           :examples $ []
           :schema $ :: 'String
         'sync-clients! $ %{} 'CodeEntry (:doc |)
