@@ -50,30 +50,24 @@ CI 保留现有 strict workflow 检查，并按 browser/native 两个入口检�
 旧模块源码 HEAD/干净状态已对照原解析记录核实；本地未运行 Caps，也不把旧 native realization
 当作新工具链的干净安装验收。
 
-新图的首轮检查实际失败：browser237通过、2失败、8阻塞、3级联；native58通过、1失败、
-11阻塞、3级联。旧 Map 读取的 Option 结果仍流入登录状态、路由、用户名/密码比较和存档路径，
-并存在旧 `some?` 等写法，后续必须按真实数据边界迁移，不批量 unwrap、加断言或放宽门禁。
-以上是首轮结果，不是当前迁移已完成的声明。
+站点配置和登录/容器本地状态已改为真实 Struct；原配置值、存储文件、Map 状态、用户名/密码
+List 和 WebSocket envelope 保持不变。网络 patch 使用 Recollect 自带 `decode-changes` 重新建立
+EDN 往返后的名义类型，不再强转；未知消息仍忽略。游客缺失的计数/颜色在视图中明确使用 Option，
+Respo 游标保留合法的混合键，不伪装成纯 Tag Map。
 
-第二阶段已把六字段站点配置改为具名 Struct，同步10处读取；端口5021、标题、图标、主题、
-`workflow-storage-calcit` 和 `storage.cirru` 全部保留。六个原值已在 native 和生成 JS 中实际执行验收。
-登录视图显式区分缺失/空状态与已有状态，解码为真实 `LoginState`；对外仍发送原 Map 状态和
-用户名/密码 List，不改变 localStorage key、注册/登录操作或 WebSocket 数据格式。
+已规范7处会导致 JS 导入时立即调用的顶层定义；门禁缺口见
+[Calcit #2166](https://github.com/calcit-lang/calcit/issues/2166)。现有 imports 不作多余改写；
+build-errors 路径对齐生成器实际输出的 `.mjs`，watcher 使用带 `!` 的当前接口。
 
-新增一条定义附带回归覆盖缺失、nil 和已有 Unicode 凭据，native1/1通过；同一测试 AST 在生成
-JS 中执行通过。临时 Node 回放还实际调用了两种输入处理器及注册/登录回调，确认更新一个字段
-保留另一个字段、状态仍为 Map、凭据仍为 List。localStorage 在该回放中是内存替身，**不是浏览器
-端到端或真实后端验收**；临时入口/脚本不纳入仓库。
+当前 browser253/253 可达定义及全部8个自有前端 namespace（38/38定义）通过；两条定义附带
+native 回归通过，配对 JS 生成、Vite 构建，以及实际生成代码的视图/输入/序列化 patch 回放通过。
+临时 Node 回放使用现有 Vite 打包浏览器依赖，不声称原始浏览器模块可直接由 Node 加载；也不是
+浏览器端到端、WebSocket 服务或生产验收。临时入口、产物及脚本均不纳入仓库。
 
-实际 JS 加载还发现7处顶层 `defn` 额外包装，会变成导入时的立即调用；已通过官方事务规范，
-并逐项确认 schema/tests/doc/FFI 元数据未丢失。相关门禁缺口与两个纯函数的独立复现已向
-[Calcit #2166](https://github.com/calcit-lang/calcit/issues/2166) 汇报；不增加编译器硬编码迁移规则。
-现有 imports 已是正确的无 `[]` 写法，不为形式统一作多余改动。
-
-当前 config/schema/login/navigation 四个 namespace 门禁15/15通过、零诊断，但全量入口仍失败：
-browser242通过、0独立失败、8阻塞、2级联；native60通过、1失败、9阻塞、3级联。
-协议/容器读取、原生数据库与 updater 的真实类型边界等仍待迁移，不能用局部门禁代替整体验收。
-尚未提交 PR、启动业务后端、合并或部署生产，原部署路径不变。
+原生端仍为63通过、1失败、7阻塞、1级联。Reel 已按数据库 Map 实例化，并在历史记录回放边界
+检查 sid/id/time；完整数据库、session、user、twig/updater 类型仍须加强和验收。弱类型扫描仍有
+28个定义的51处 schema Dynamic，未放宽任何基线或声称类型债务清零。尚未提交 PR、启动业务
+后端、合并或部署生产。
 
 ### License
 

@@ -90,8 +90,8 @@
             println "|Running mode:" $ if config/dev? |dev |release
             render-app!
             connect!
-            add-watch *store :changes $ fn (store prev) (render-app!)
-            add-watch *states :changes $ fn (states prev) (render-app!)
+            add-watch! *store :changes $ fn (store prev) (render-app!)
+            add-watch! *states :changes $ fn (states prev) (render-app!)
             on-page-touch $ fn () $ if (nil? @*store) (connect!) &unit
             println "|App started!"
           :examples $ []
@@ -99,18 +99,24 @@
             :args $ []
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mount-target ()
-            unsafe-coerce (.?!querySelector js/document |.app) (quote JsObject)
+            .unwrap $ respo.ffi.browser/query-selector |.app
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'JsObject)
+          :schema $ :: 'Fn $ {} (:return 'respo.dom/DomElement)
             :args $ []
             :features $ #{} :js-ffi
         'on-server-data $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-server-data (data)
-            case-default (&map:get data :kind) (println "|unknown server data kind:" data)
-              :patch $ let
-                  changes $ unsafe-coerce (&map:get data :data) (:: 'List 'recollect.schema/change-op)
-                when config/dev? $ js/console.log |Changes $ to-js-data changes
-                reset! *store $ patch-twig @*store changes
+            match (get data :kind)
+              (:some kind)
+                if (tag? kind)
+                  case-default (decode-map-as kind 'Tag) (println "|unknown server data kind:" data)
+                    :patch $ let
+                        changes $ schema/decode-nullable-field data :data recollect.schema/decode-changes
+                      when config/dev? $ js/console.log |Changes $ to-js-data changes
+                      reset! *store $ patch-twig @*store changes
+                  println "|unknown server data kind:" data
+              (:none) (println "|unknown server data kind:" data)
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] $ :: 'Map 'Tag 'Dynamic
@@ -118,19 +124,25 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if
-              or (some? client-errors) (some? server-errors)
+              or (js-present? client-errors) (js-present? server-errors)
               hud! |error $ str client-errors &newline server-errors
-              do (hud! |inactive nil) (remove-watch *store :changes) (remove-watch *states :changes) (clear-cache!) (render-app!)
-                add-watch *store :changes $ fn (store prev) (render-app!)
-                add-watch *states :changes $ fn (states prev) (render-app!)
+              do (hud! |inactive nil) (remove-watch! *store :changes) (remove-watch! *states :changes) (clear-cache!) (render-app!)
+                add-watch! *store :changes $ fn (store prev) (render-app!)
+                add-watch! *states :changes $ fn (states prev) (render-app!)
                 println "|Code updated."
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
+            :features $ #{} :js-ffi
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render! (mount-target)
-              comp-container (&map:get @*states :states) @*store
+              comp-container
+                schema/decode-nullable-field
+                  decode-map-as @*states $ :: 'Map 'Tag 'Dynamic
+                  , :states $ fn (value)
+                    decode-map-as value $ :: 'Map 'Dynamic 'Dynamic
+                , @*store
               , dispatch-action!
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -160,53 +172,67 @@
             cumulo-util.core :refer $ on-page-touch
             |url-parse :default url-parse
             |bottom-tip :default hud!
-            |./calcit.build-errors :default client-errors
-            |../js-out/calcit.build-errors :default server-errors
+            |./calcit.build-errors.mjs :default client-errors
+            |../js-out/calcit.build-errors.mjs :default server-errors
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
+        'ContainerState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defstruct ContainerState (:demo 'String)
+          :examples $ []
+          :schema $ :: 'StructDef
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (states store)
-            let
-                state $ either (&map:get states :data)
-                  {} $ :demo |
-                session $ &map:get
-                  either store $ {}
-                  , :session
-                router $ either
-                  &map:get
-                    either store $ {}
-                    , :router
-                  {}
-                router-data $ &map:get router :data
-              if (nil? store) (comp-offline)
+            if (nil? store) (comp-offline)
+              let
+                  fields $ decode-map-as store $ :: 'Map 'Tag 'Dynamic
+                  state $ schema/decode-nullable-field states :data $ fn (value)
+                    if (nil? value) (ContainerState :demo |) (decode-map-as value 'app.comp.container/ContainerState)
+                  logged-in? $ schema/decode-nullable-field fields :logged-in? $ fn (value) (decode-map-as value 'Bool)
+                  router $ schema/decode-nullable-field fields :router $ fn (value)
+                    if (nil? value) ({})
+                      decode-map-as value $ :: 'Map 'Tag 'Dynamic
+                  route $ schema/decode-optional-field router :name $ fn (value) (decode-map-as value 'Tag)
                 div
                   {} $ :style $ merge ui/global ui/fullscreen ui/column
-                  comp-navigation (&map:get store :logged-in?) (&map:get store :count)
-                  if (&map:get store :logged-in?)
-                    case-default (&map:get router :name) (<> router)
-                      :home $ div
-                        {} $ :style $ {} (:padding |8px)
-                        input $ {} (:style ui/input)
-                          :value $ str $ &map:get state :demo
-                        =< 8 nil
-                        <> "|demo page"
-                        pre $ {} $ :inner-text
-                          str "|backend data" $ format-cirru-edn store
-                      :profile $ comp-profile (&map:get store :user) (&map:get router :data)
+                  comp-navigation logged-in? $ schema/decode-optional-field fields :count $ fn (value) (decode-map-as value 'Number)
+                  if logged-in?
+                    match route
+                      (:some route-name)
+                        case-default route-name
+                          <> $ str router
+                          :home $ div
+                            {} $ :style $ {} (:padding |8px)
+                            input $ {} (:style ui/input)
+                              :value $ :demo state
+                            =< 8 nil
+                            <> "|demo page"
+                            pre $ {} $ :inner-text
+                              str "|backend data" $ format-cirru-edn store
+                          :profile $ comp-profile
+                            schema/decode-nullable-field fields :user $ fn (value)
+                              decode-map-as value $ :: 'Map 'Tag 'Dynamic
+                            schema/decode-nullable-field router :data $ fn (value)
+                              decode-map-as value $ :: 'Map 'Number 'Dynamic
+                      (:none)
+                        <> $ str router
                     comp-login $ >> states :login
-                  comp-status-color $ &map:get store :color
+                  comp-status-color $ schema/decode-optional-field fields :color $ fn (value) (decode-map-as value 'String)
                   when dev? $ comp-inspect |Store store $ {} (:bottom 0) (:left 0) (:max-width |100%)
                   comp-messages
-                    option:unwrap-or
-                      get-in store $ [] :session :messages
-                      {}
+                    decode-map-as
+                      option:unwrap-or
+                        get-in fields $ [] :session :messages
+                        {}
+                      :: 'Map 'String 'Dynamic
                     {}
                     fn (info d!)
                       d! $ :: :session/remove-message info
-                  when dev? $ comp-reel (&map:get store :reel-length) ({})
+                  when dev? $ comp-reel
+                    schema/decode-nullable-field fields :reel-length $ fn (value) (decode-map-as value 'Number)
+                    {}
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
+            :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Dynamic
         'comp-offline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-offline ()
             div
@@ -231,13 +257,16 @@
             :args $ []
         'comp-status-color $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-status-color (color)
-            div $ {} $ :style
-              let
-                  size 24
-                {} (:width size) (:height size) (:position :absolute) (:bottom 60) (:left 8) (:background-color color) (:border-radius |50%) (:opacity 0.6) (:pointer-events :none)
+            let
+                size 24
+                base-style $ {} (:width size) (:height size) (:position :absolute) (:bottom 60) (:left 8) (:border-radius |50%) (:opacity 0.6) (:pointer-events :none)
+              div $ {} $ :style
+                match color
+                  (:some value) (assoc base-style :background-color value)
+                  (:none) base-style
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'String
+            :args $ [] $ :: 'Option 'String
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
@@ -309,7 +338,7 @@
                       :on-click $ on-submit (:username state) (:password state) false
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
+            :args $ [] $ :: 'Map 'Dynamic 'Dynamic
         'initial-state $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def initial-state (LoginState :username | :password |)
           :examples $ []
@@ -333,7 +362,8 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'String 'String
             :features $ #{} :js-ffi
-        'read-login-state $ %{} 'CodeEntry (:doc |)
+        'read-login-state $ %{} 'CodeEntry
+          :doc "|Decode only the local credential data; the surrounding Respo cursor map can legitimately retain mixed Tag/String/Number child keys, as defined by respo.core/>>. Do not cast or decode that heterogeneous key space into Tag-only state."
           :code $ quote $ defn read-login-state (states)
             match (get states :data)
               (:some raw-state)
@@ -341,7 +371,7 @@
               (:none) initial-state
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.login/LoginState)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
+            :args $ [] $ :: 'Map 'Dynamic 'Dynamic
           :tests $ [] $ %{} 'TestEntry (:name |missing-null-and-stored-credentials)
             :code $ quote $ do
               assert= initial-state $ read-login-state $ {}
@@ -383,10 +413,12 @@
                     d! $ :: :router/change $ {} (:name :profile)
                 <> $ if logged-in? |Me |Guest
                 =< 8 nil
-                <> $ str count-members
+                <> $ match count-members
+                  (:some n) (str n)
+                  (:none) |
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Bool 'Number
+            :args $ [] 'Bool $ :: 'Option 'Number
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.navigation
           :require
@@ -404,7 +436,10 @@
                 {} $ :padding 16
               div
                 {} $ :style $ {} (:font-family ui/font-fancy) (:font-size 32) (:font-weight 100)
-                <> $ str "|Hello! " $ &map:get user :name
+                <> $ str "|Hello! " $ match
+                  schema/decode-optional-field user :name $ fn (value) (decode-map-as value 'String)
+                  (:some name) name
+                  (:none) |
               =< nil 16
               div
                 {} $ :style ui/row
@@ -488,13 +523,55 @@
               :users $ do user $ {}
           :examples $ []
           :schema $ :: 'Map 'Tag 'Dynamic
-        'read-field $ %{} 'CodeEntry
-          :doc "|Read a field from an open map or nominal struct boundary."
-          :code $ quote $ defn read-field (value field)
-            option:unwrap-or (get value field) nil
+        'decode-nullable-field $ %{} 'CodeEntry
+          :doc "|Legacy wire/state field boundary: decode Some payloads and send missing fields to the same decoder as nil. Preserve old nil/default/error behavior; generic T is the actual decoder result, not a cast of unknown data."
+          :code $ quote $ defn decode-nullable-field (fields field decoder)
+            match (get fields field)
+              (:some value) (decoder value)
+              (:none) (decoder nil)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic 'Tag
+          :schema $ :: 'Fn $ {} (:return 'T)
+            :args $ [] (:: 'Map 'K 'Dynamic) 'K $ :: 'Fn
+              {} (:return 'T)
+                :args $ [] 'Dynamic
+            :generics $ [] 'K 'T
+        'decode-optional-field $ %{} 'CodeEntry
+          :doc "|Decode legacy missing/nil wire fields into typed Option, invoking the payload decoder only for present non-nil values. A nullability normalization at the legacy Map boundary, not a cast or a new fallback value."
+          :code $ quote $ defn decode-optional-field (fields field decoder)
+            match (get fields field)
+              (:some value)
+                if (nil? value) (%none)
+                  %some $ decoder value
+              (:none) (%none)
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] (:: 'Map 'K 'Dynamic) 'K $ :: 'Fn
+              {} (:return 'T)
+                :args $ [] 'Dynamic
+            :generics $ [] 'K 'T
+            :return $ :: 'Option 'T
+          :tests $ [] $ %{} 'TestEntry (:name |legacy-absence-preserves-zero)
+            :code $ quote $ let
+                decode-number $ fn (value)
+                  hint-fn $ {}
+                    :args $ [] 'Dynamic
+                    :return 'Number
+                  decode-map-as value 'Number
+              assert= (%none)
+                decode-optional-field ({}) :value decode-number
+              assert= (%none)
+                decode-optional-field
+                  {} $ :value nil
+                  , :value decode-number
+              assert= (%some 0)
+                decode-optional-field
+                  {} $ :value 0
+                  , :value decode-number
+              assert= (%some 7)
+                decode-optional-field
+                  {} $ |key 7
+                  , |key decode-number
+            :tags $ #{} :unit
         'router $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def router
             {} (:name nil) (:title nil)
@@ -538,12 +615,12 @@
         '*reader-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defatom *reader-reel @*reel
           :examples $ []
-          :schema $ :: 'Ref 'cumulo-reel.core/ReelState
+          :schema $ :: 'Ref $ :: 'cumulo-reel.core/ReelState (:: 'Map 'Tag 'Dynamic)
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel
-            struct-with reel-schema (:base @*initial-db) (:db @*initial-db)
+          :code $ quote $ defref *reel
+            cumulo-reel.core/ReelState :base @*initial-db :db @*initial-db :records ([]) :merged? false
           :examples $ []
-          :schema $ :: 'Ref 'cumulo-reel.core/ReelState
+          :schema $ :: 'Ref $ :: 'cumulo-reel.core/ReelState (:: 'Map 'Tag 'Dynamic)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op op-data sid)
             let
@@ -565,8 +642,10 @@
             let
                 now $ extract-time $ get-time!
               join-path calcit-dirname |backups
-                str $ &map:get now :month
-                str (&map:get now :day) |-snapshot.cirru
+                str $ .unwrap $ get now :month
+                str
+                  .unwrap $ get now :day
+                  , |-snapshot.cirru
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'String)
             :args $ []
@@ -606,6 +685,7 @@
                 backup-path $ get-backup-path!
               check-write-file! storage-path file-content
               check-write-file! backup-path file-content
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -613,7 +693,7 @@
           :code $ quote $ defn reload! () (println "|Code updated..")
             if (not config/dev?) (raise "|reloading only happens in dev mode")
             clear-twig-caches!
-            reset! *reel $ refresh-reel @*reel @*initial-db updater
+            reset! *reel $ refresh-reel @*reel @*initial-db replay-updater
             sync-clients! @*reader-reel
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -628,6 +708,14 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
+        'replay-updater $ %{} 'CodeEntry
+          :doc "|Reel stores heterogeneous historical record cells. Decode real session/id/time types at replay instead of claiming updater accepts arbitrary values or preserves an unrelated generic Db."
+          :code $ quote $ defn replay-updater (db op sid op-id op-time)
+            updater db op (decode-map-as sid 'Number) (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic 'Dynamic 'Dynamic 'Dynamic
+            :return $ :: 'Map 'Tag 'Dynamic
         'run-server! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn run-server! (port)
             wss-serve! (&{} :port port)
@@ -672,7 +760,7 @@
             finish-twig-frame!
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'cumulo-reel.core/ReelState
+            :args $ [] $ :: 'cumulo-reel.core/ReelState (:: 'Map 'Tag 'Dynamic)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.server
           :require (app.schema :as schema)
