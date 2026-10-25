@@ -585,7 +585,7 @@
               let
                   values $ decode-map-as raw $ :: 'List 'String
                 if
-                  not= 2 $ count values
+                  not= 2 $ .len values
                   raise |Expected-two-credential-strings
                 Credentials :username
                   .unwrap $ nth values 0
@@ -1033,7 +1033,7 @@
                   (:none) ({})
                   (:some session) (app.schema/session-to-wire session)
                 base-data $ {} (:logged-in? false) (:session raw-session)
-                  :reel-length $ count records
+                  :reel-length $ .len records
               match maybe-session
                 (:none) base-data
                 (:some session)
@@ -1063,7 +1063,7 @@
                             (:some found) (twig-user found)
                         merge base-data $ {} (:logged-in? true) (:user user)
                           :router $ assoc router :data route-data
-                          :count $ count $ :sessions db
+                          :count $ .len $ :sessions db
                           :color $ rand-hex-color!
           :examples $ []
           :schema $ :: 'Fn $ {}
@@ -1146,7 +1146,7 @@
                   view-user $ schema/decode-nullable-field view :user $ fn (value)
                     decode-map-as value $ :: 'Map 'Tag 'Dynamic
                   disconnected $ updater removed (schema/ServerOp :session/disconnect) 1 |disconnect 8
-                assert= 1 $ count $ :users db2
+                assert= 1 $ .len $ :users db2
                 assert= "|迁移用户🐈" $ :name user
                 assert= true $ not= |secret031 $ :password user
                 assert= (Option :some |u1) (:user-id session)
@@ -1161,8 +1161,8 @@
                 assert= false $ contains? (:messages final-session) |bad-password
                 assert= false $ contains? view-user :password
                 assert= true $ schema/decode-nullable-field view :logged-in? $ fn (value) (decode-map-as value 'Bool)
-                assert= 0 $ count $ :sessions disconnected
-                assert= 1 $ count $ :users disconnected
+                assert= 0 $ .len $ :sessions disconnected
+                assert= 1 $ .len $ :users disconnected
               let
                   base $ schema/decode-database schema/database
                   empty-reel $ cumulo-reel.core/ReelState :base base :db base :records ([]) :merged? false
@@ -1171,7 +1171,7 @@
                     schema/ServerOp :user/sign-up $ schema/Credentials :username |Replay031 :password |fixture-secret
                     , 1 |replay-user 1 true
                   restored $ cumulo-reel.core/refresh-reel signed base app.server/replay-updater
-                assert= 2 $ count $ :records signed
+                assert= 2 $ .len $ :records signed
                 assert=
                   schema/database-to-wire $ :db signed
                   schema/database-to-wire $ :db restored
