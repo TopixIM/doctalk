@@ -47,14 +47,14 @@
             when
               and config/dev? $ not= op :states
               println |Dispatch op op-data
-            case-default op
-              ws-send! $ {} (:kind :op) (:op op) (:data op-data)
+            match op
               :states $ let[] (cursor state)
                 decode-map-as op-data $ :: 'List 'Dynamic
                 reset! *states $ update-states @*states
                   decode-map-as cursor $ :: 'List 'Dynamic
                   , state
               :effect/connect $ connect!
+              _ $ ws-send! $ {} (:kind :op) (:op op) (:data op-data)
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -100,11 +100,12 @@
               match (get data :kind)
                 (:some kind)
                   if (tag? kind)
-                    case-default (decode-map-as kind 'Tag) (println "|unknown server data kind:" data)
+                    match (decode-map-as kind 'Tag)
                       :patch $ let
                           changes $ schema/decode-nullable-field data :data recollect.schema/decode-changes
                         when config/dev? $ js/console.log |Changes $ to-js-data changes
                         reset! *store $ patch-twig @*store changes
+                      _ $ println "|unknown server data kind:" data
                     println "|unknown server data kind:" data
                 (:none) (println "|unknown server data kind:" data)
               , &unit
@@ -191,8 +192,7 @@
                   if logged-in?
                     match route
                       (:some route-name)
-                        case-default route-name
-                          <> $ str router
+                        match route-name
                           :home $ div
                             {} $ :style $ {} (:padding |8px)
                             input $ {} (:style ui/input)
@@ -205,6 +205,7 @@
                             schema/decode-nullable-field fields :user $ fn (value)
                               decode-map-as value $ :: 'Map 'Tag 'Dynamic
                             schema/decode-nullable-field router :data app.schema/decode-members
+                          _ $ <> $ str router
                       (:none)
                         <> $ str router
                     comp-login $ >> states :login
@@ -212,7 +213,7 @@
                   when dev? $ comp-inspect |Store store $ {} (:bottom 0) (:left 0) (:max-width |100%)
                   comp-messages
                     decode-map-as
-                      option:unwrap-or
+                      .unwrap-or
                         get-in fields $ [] :session :messages
                         {}
                       :: 'Map 'String 'Dynamic
@@ -285,7 +286,7 @@
           :code $ quote $ defcomp comp-login (states)
             let
                 cursor $ decode-map-as
-                  option:unwrap-or (get states :cursor) nil
+                  .unwrap-or (get states :cursor) nil
                   :: 'Optional $ :: 'List 'Dynamic
                 state $ read-login-state states
               div
@@ -303,7 +304,7 @@
                               :: 'Fn $ {} (:return 'Unit)
                                 :args $ [] 'Enum
                           d! $ :: :states cursor $ {}
-                            :username $ str $ option:unwrap-or (get e :value) |
+                            :username $ str $ .unwrap-or (get e :value) |
                             :password $ :password state
                     =< nil 8
                     div ({})
@@ -317,7 +318,7 @@
                                 :args $ [] 'Enum
                           d! $ :: :states cursor $ {}
                             :username $ :username state
-                            :password $ str $ option:unwrap-or (get e :value) |
+                            :password $ str $ .unwrap-or (get e :value) |
                   =< nil 8
                   div
                     {} $ :style $ {} (:text-align :right)
@@ -504,7 +505,7 @@
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def dev?
-            = |dev $ option:unwrap-or (get-env |mode) |release
+            = |dev $ .unwrap-or (get-env |mode) |release
           :examples $ []
           :schema $ :: 'Bool
         'site $ %{} 'CodeEntry (:doc |)
@@ -652,7 +653,7 @@
             :generics $ [] 'K 'T
         'decode-operation $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-operation (kind data)
-            case-default kind (ServerOp :unknown kind data)
+            match kind
               :session/connect $ ServerOp :session/connect
               :session/disconnect $ ServerOp :session/disconnect
               :session/remove-message $ ServerOp :session/remove-message $ if (string? data) (decode-map-as data 'String)
@@ -663,6 +664,7 @@
               :user/sign-up $ ServerOp :user/sign-up $ decode-credentials data
               :user/log-out $ ServerOp :user/log-out
               :router/change $ ServerOp :router/change $ decode-map-as data (:: 'Map 'Tag 'Dynamic)
+              _ $ ServerOp :unknown kind data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/ServerOp)
             :args $ [] 'Tag 'Dynamic
@@ -871,13 +873,13 @@
             println "|Running mode:" $ if config/dev? |dev |release
             let
                 default-port $ :port config/site
-                port $ option:unwrap-or
-                  option:map (get-env |port)
+                port $ .unwrap-or
+                  .map (get-env |port)
                     fn (text)
                       hint-fn $ {}
                         :args $ [] 'String
                         :return 'Number
-                      result:unwrap-or (parse-float text) default-port
+                      .unwrap-or (parse-float text) default-port
                   , default-port
               run-server! port
               println $ str "|Server started on port:" port
@@ -1044,7 +1046,7 @@
                           route-data $ match route-name
                             (:none) ({})
                             (:some name)
-                              case-default name ({})
+                              match name
                                 :home $ .unwrap-or
                                   get (:extra db) :pages
                                   , nil
@@ -1054,6 +1056,7 @@
                                     MapEntryDecision :keep sid $ match name
                                       (:some value) value
                                       (:none) nil
+                                _ $ {}
                           user $ match
                             get (:users db) uid
                             (:none) ({})

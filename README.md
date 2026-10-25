@@ -12,11 +12,11 @@ TODO
 
 https://github.com/Cumulo/calcium-workflow
 
-当前迁移候选固定已发布的 Calcit / `@calcit/procs` 0.30.1-alpha.5（预发布）、
+当前迁移候选精确配对正式 Calcit / `@calcit/procs` 0.30.1、
 Caps 0.1.1、Node 24、Yarn 4.18.0。模块改用已共同验收的精确正式依赖图，不使用 hash、浮动 main
 或旧 Respo/UI alpha；未被任何应用代码或 namespace import 消费的 Lilac 已移除。
-这是预发布工具链迁移，不代表 0.30.1 正式版。alpha.5 经 Yarn 原有 60 分钟隔离期后正常安装，
-未添加白名单或降低安全设置。**未经后端环境验收，不应合并部署。**
+Yarn 原配置与依赖隔离保持不变，未添加白名单或降低安全设置。
+**未经后端环境验收，不应合并部署。**
 
 ```sh
 caps --strict --ci
@@ -43,7 +43,24 @@ COS 仅上传 `dist/` 前端资源，使用 `cos-upload-action@v1.2.0` 的 `publ
 CI 保留现有 strict workflow 检查，并按 browser/native 两个入口检查全部公开定义。
 生成的 `js-out/`、`dist/`、`dist-server/` 和旧 `compact.cirru` / `package.cirru` 不进入仓库。
 
-### 迁移基线与当前限制
+### 本次正式版迁移
+
+六处 `option:unwrap-or`、一处 `option:map` 和一处 `result:unwrap-or` 改用对应方法；
+五处 Tag `case-default` 改为字面量 `match`，保留分支顺序并将原默认处理置于末尾 `_`。
+输入、默认值、未知消息、端口解析、网络及存档格式不变，公开 schema、原测试、HUD 与配置不变。
+九个模块配对兼容的精确正式 tag，原 std/WSS 不变；Memof 无根源码直接调用，不声称已验收其新 API。
+原工作流与 Yarn 配置完全不变，不新增维护脚本、测试框架或基线例外。
+
+本次官方 Linux 正式图已通过完整 strict（0 诊断）、原两目标 namespace 检查、原生 4/4、
+原登录状态与数据合同 native 3/3、JS 3/3（无排除）、immutable 安装及完整构建。
+成功产物先验证 SHA256，再核对原/新 blob 与 80 个定义/15 namespace 的完整结构化视图；
+仅导入十三处期望调用改写，临时准备 CI、事务和回放文件不进入最终 PR。
+
+本次没有重验真实 WebSocket、账户/localStorage、退出保存或冷启动；下面 alpha 阶段的
+合成账户验收仅为历史证据，不能替代本次正式图验收。原 `/servers/paste-sharing/`、
+后端环境、存档备份/回滚和前后端协同上线限制继续保留；未合并或部署。
+
+### 先前 alpha 迁移基线与当前限制
 
 未改源码的 0.27.0 基线在原有只读模块图下通过 browser216/216、native53/53，
 配对 JS 生成与 Vite 构建通过。原仓库没有定义附带测试，不能把零测试视为回归通过。
