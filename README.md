@@ -43,13 +43,30 @@ COS 仅上传 `dist/` 前端资源，使用 `cos-upload-action@v1.2.0` 的 `publ
 CI 保留现有 strict workflow 检查，并按 browser/native 两个入口检查全部公开定义。
 生成的 `js-out/`、`dist/`、`dist-server/` 和旧 `compact.cirru` / `package.cirru` 不进入仓库。
 
-### 本次正式版迁移
+### 本轮集合方法清理
+
+七处集合 `count` 改为 `.len`：凭据 List 长度、Reel 记录数、会话 Map 数量，
+以及原账户/session 生命周期测试中的四处集合断言。原参数、断言、标签、公开 schema、
+HUD、端口、协议和存档不变；不重构认证或改变 `/servers/paste-sharing/` 部署路径。
+
+官方正式 0.30.1 的[准备 CI](https://github.com/TopixIM/doctalk/actions/runs/40238809764)
+通过前后完整 strict、原双入口及全部自有 namespace 检查（browser 50/server 55，联合覆盖全部 80 定义）、
+原生 4/4、现有登录/数据合同 native/JS 各 3/3、immutable 安装和完整前端构建。
+成功 ZIP 先校验 SHA256，再对照全部 80 定义/15 namespace 的独立原/预期/新视图和实际产物；
+174 个浏览器生成模块前后字节相同。这不证明 native 服务运行、账户/存储或浏览器端到端验收。
+
+依赖和 lock 不变，不新增测试框架、常驻检查或基线例外。原规范化门禁改用格式化前后 blob
+哈希相等检查，保留所有原门禁；临时迁移 CI、事务脚本和生成代码不入库。
+其余 `merge` 仅为扫描候选，不据名字机械改写，也不声称整个项目已无待评估写法。
+不合并或生产部署；后端环境、备份/回滚和前后端协同上线要求仍有效。
+
+### 前次正式版迁移
 
 六处 `option:unwrap-or`、一处 `option:map` 和一处 `result:unwrap-or` 改用对应方法；
 五处 Tag `case-default` 改为字面量 `match`，保留分支顺序并将原默认处理置于末尾 `_`。
 输入、默认值、未知消息、端口解析、网络及存档格式不变，公开 schema、原测试、HUD 与配置不变。
 九个模块配对兼容的精确正式 tag，原 std/WSS 不变；Memof 无根源码直接调用，不声称已验收其新 API。
-原工作流与 Yarn 配置完全不变，不新增维护脚本、测试框架或基线例外。
+当时原工作流与 Yarn 配置完全不变，不新增维护脚本、测试框架或基线例外。
 
 本次官方 Linux 正式图已通过完整 strict（0 诊断）、原两目标 namespace 检查、原生 4/4、
 原登录状态与数据合同 native 3/3、JS 3/3（无排除）、immutable 安装及完整构建。
