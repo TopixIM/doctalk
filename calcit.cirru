@@ -187,7 +187,7 @@
                       decode-map-as value $ :: 'Map 'Tag 'Dynamic
                   route $ schema/decode-optional-field router :name $ fn (value) (decode-map-as value 'Tag)
                 div
-                  {} $ :style $ merge ui/global ui/fullscreen ui/column
+                  {} $ :style $ .merge ui/global ui/fullscreen ui/column
                   comp-navigation logged-in? $ schema/decode-optional-field fields :count $ fn (value) (decode-map-as value 'Number)
                   if logged-in?
                     match route
@@ -229,7 +229,7 @@
         'comp-offline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-offline ()
             div
-              {} $ :style $ merge ui/global ui/fullscreen ui/column-dispersive
+              {} $ :style $ .merge ui/global ui/fullscreen ui/column-dispersive
                 {} $ :background-color $ :theme config/site
               div $ {} $ :style
                 {} $ :height 0
@@ -290,7 +290,7 @@
                   :: 'Optional $ :: 'List 'Dynamic
                 state $ read-login-state states
               div
-                {} $ :style $ merge ui/flex ui/center
+                {} $ :style $ .merge ui/flex ui/center
                 div ({})
                   div
                     {} $ :style $ {}
@@ -323,11 +323,11 @@
                   div
                     {} $ :style $ {} (:text-align :right)
                     span $ {} (:inner-text "|Sign up")
-                      :style $ merge ui/link
+                      :style $ .merge ui/link
                       :on-click $ on-submit (:username state) (:password state) true
                     =< 8 nil
                     span $ {} (:inner-text "|Log in")
-                      :style $ merge ui/link
+                      :style $ .merge ui/link
                       :on-click $ on-submit (:username state) (:password state) false
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
@@ -400,7 +400,7 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-navigation (logged-in? count-members)
             div
-              {} $ :style $ merge ui/row-center
+              {} $ :style $ .merge ui/row-center
                 {} (:height 48) (:justify-content :space-between) (:padding "|0 16px") (:font-size 16)
                   :border-bottom $ str "|1px solid " $ hsl 0 0 0 0.1
                   :font-family ui/font-fancy
@@ -436,7 +436,7 @@
         'comp-profile $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-profile (user members)
             div
-              {} $ :style $ merge ui/flex
+              {} $ :style $ .merge ui/flex
                 {} $ :padding 16
               div
                 {} $ :style $ {} (:font-family ui/font-fancy) (:font-size 32) (:font-weight 100)
@@ -462,13 +462,13 @@
               div ({})
                 button
                   {}
-                    :style $ merge ui/button
+                    :style $ .merge ui/button
                     :on-click $ fn (e d!) (refresh-location!)
                   <> |Refresh
                 =< 8 nil
                 button
                   {}
-                    :style $ merge ui/button $ {} (:color :red) (:border-color :red)
+                    :style $ .merge ui/button $ {} (:color :red) (:border-color :red)
                     :on-click $ fn (e dispatch!)
                       dispatch! $ :: :user/log-out
                       remove-storage! $ str $ :storage-key config/site
@@ -566,7 +566,7 @@
           :schema $ :: 'Map 'Tag 'Dynamic
         'database-to-wire $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn database-to-wire (db)
-            merge (:extra db)
+            .merge (:extra db)
               {}
                 :users $ filter-map-kv (:users db)
                   fn (id user)
@@ -599,7 +599,7 @@
         'decode-database $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-database (raw)
             let
-                fields $ merge database $ decode-map-as raw (:: 'Map 'Tag 'Dynamic)
+                fields $ .merge database $ decode-map-as raw (:: 'Map 'Tag 'Dynamic)
               Database :users (decode-nullable-field fields :users decode-users) :sessions (decode-nullable-field fields :sessions decode-sessions) :extra $ -> fields (dissoc :users) (dissoc :sessions)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Database)
@@ -784,7 +784,7 @@
             :return $ :: 'Map 'String 'app.schema/User
         'session-to-wire $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn session-to-wire (session)
-            merge (:extra session)
+            .merge (:extra session)
               {}
                 :id $ :id session
                 :user-id $ match (:user-id session)
@@ -801,7 +801,7 @@
             :return $ :: 'Map 'Tag 'Dynamic
         'user-to-wire $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn user-to-wire (user)
-            merge (:extra user)
+            .merge (:extra user)
               {}
                 :id $ :id user
                 :name $ :name user
@@ -1061,7 +1061,7 @@
                             get (:users db) uid
                             (:none) ({})
                             (:some found) (twig-user found)
-                        merge base-data $ {} (:logged-in? true) (:user user)
+                        .merge base-data $ {} (:logged-in? true) (:user user)
                           :router $ assoc router :data route-data
                           :count $ .len $ :sessions db
                           :color $ rand-hex-color!
