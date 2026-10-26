@@ -46,10 +46,9 @@ jobs:
 
     - name: Validate Calcit snapshot and types
       run: |
+        set -euo pipefail
         calcit calcit.cirru fix --workflow strict --verify --format edn
-        snapshot_before="$(git hash-object calcit.cirru)"
-        calcit calcit.cirru edit format
-        test "$snapshot_before" = "$(git hash-object calcit.cirru)"
+        calcit calcit.cirru edit transaction --code '[["edit","format"]]' --dry-run --format json | jq -e '.changed == false'
         yarn check-client
         yarn check-server
         calcit calcit.cirru --entry server test --require-match --summary-only
