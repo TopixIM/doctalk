@@ -43,6 +43,61 @@ jobs:
           (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
           print(json.dumps(manifest))
           PY
+      - name: Preview the reviewed cursor contract with official guarded edit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import copy,json,pathlib,subprocess
+          out=pathlib.Path('.calcit/query0342')
+          before=json.loads((out/'definitions.json').read_text())
+          target='app.comp.login/comp-login'
+          original=['::',"'Optional",['::',"'List","'Dynamic"]]
+          assert before[target]['code'][3][1][0][1][2]==original
+          operations=[['tree','replace',target,'--path','3.1.0.1.2','--code',"quote $ :: 'List 'Dynamic",'--expect',"quote $ :: 'Optional (:: 'List 'Dynamic)"]]
+          args=['calcit','edit','transaction','--code',json.dumps(operations)]
+          r=subprocess.run(args+['--dry-run','--format','json'],capture_output=True,text=True,check=True)
+          preview=json.loads(r.stdout);assert preview['changed']
+          (out/'reviewed-cursor-preview.json').write_text(r.stdout)
+          subprocess.run(args+['--expect-revision',preview.get('scoped_revision') or preview['original_revision'],'--format','json'],check=True)
+          after={}
+          for name in before:
+              r=subprocess.run(['calcit','query','def',name,'--format','json'],capture_output=True,text=True,check=True)
+              after[name]=json.loads(r.stdout)['data']
+          expected=copy.deepcopy(before);expected[target]['code'][3][1][0][1][2]=['::',"'List","'Dynamic"]
+          assert after==expected
+          (out/'reviewed-cursor-after.json').write_text(json.dumps(after,ensure_ascii=False,indent=2)+'\n')
+          p=pathlib.Path('deps.cirru');text=p.read_text();assert text.count(':calcit-version |0.30.1')==1;p.write_text(text.replace(':calcit-version |0.30.1',':calcit-version |0.34.2'))
+          p=pathlib.Path('package.json');data=json.loads(p.read_text());data['dependencies']['@calcit/procs']='0.34.2';p.write_text(json.dumps(data,indent=2)+'\n')
+          PY
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit
+          deps-file: deps.cirru
+      - name: Query canonical views with official 0.34.2
+        run: |
+          set -euo pipefail
+          test "$(calcit --version)" = "0.34.2"
+          python3 - <<'PY'
+          import json,pathlib,subprocess
+          out=pathlib.Path('.calcit/query0342')
+          args=['calcit','edit','transaction','--code','[["edit","format"]]']
+          r=subprocess.run(args+['--dry-run','--format','json'],capture_output=True,text=True,check=True)
+          preview=json.loads(r.stdout);(out/'format0342-preview.json').write_text(r.stdout)
+          if preview['changed']:subprocess.run(args+['--expect-revision',preview.get('scoped_revision') or preview['original_revision'],'--format','json'],check=True)
+          def query(*args):
+              r=subprocess.run(['calcit','query',*args,'--format','json'],capture_output=True,text=True,check=True)
+              return json.loads(r.stdout)['data']
+          namespaces={};definitions={}
+          for ns in query('ns')['namespaces']:
+              if ns.endswith('.$meta'):continue
+              namespaces[ns]=query('ns',ns)
+              for row in query('defs',ns)['definitions']:
+                  target=ns+'/'+row['name'];definitions[target]=query('def',target)
+          (out/'modern-definitions.json').write_text(json.dumps(definitions,ensure_ascii=False,indent=2)+'\n')
+          (out/'modern-namespaces.json').write_text(json.dumps(namespaces,ensure_ascii=False,indent=2)+'\n')
+          (out/'preview-scope.json').write_text(json.dumps({'cli':'0.34.2','scope':'Isolated source views after one reviewed cursor type edit and official canonical format. Declarations aligned only for formatter. No dependency installation, type/runtime acceptance, Snapshot import, release or deployment.'},indent=2)+'\n')
+          print('Canonical source definitions',len(definitions))
+          PY
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: doctalk-original-definitions
