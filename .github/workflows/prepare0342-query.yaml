@@ -32,10 +32,12 @@ jobs:
               if r.returncode:raise RuntimeError(r.stderr)
               return json.loads(r.stdout)['data']
           namespaces=query('ns')['namespaces'];definitions={}
-          for ns in namespaces:
-              if ns.endswith('.$meta'):continue
-              for row in query('defs',ns)['definitions']:
-                  target=ns+'/'+row['name'];definitions[target]=query('def',target)
+          expected=sum(query('ns',ns)['definition_count']for ns in namespaces if not ns.endswith('.$meta'))
+          for row in query('search','.', '--regex','--source','project')['definitions']:
+              target=row['id']
+              if target.split('/')[0].endswith('.$meta'):continue
+              definitions[target]=query('def',target)
+          assert len(definitions)==expected,(len(definitions),expected)
           (out/'definitions.json').write_text(json.dumps(definitions,ensure_ascii=False,indent=2)+'\n')
           manifest={'commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'snapshotBlob':subprocess.check_output(['git','rev-parse','HEAD:calcit.cirru'],text=True).strip(),'cli':subprocess.check_output(['calcit','--version'],text=True).strip(),'definitions':len(definitions),'definitionsSha256':hashlib.sha256((out/'definitions.json').read_bytes()).hexdigest(),'scope':'Official query output only; no source edits, dependency execution, type/runtime acceptance or deployment.'}
           (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
