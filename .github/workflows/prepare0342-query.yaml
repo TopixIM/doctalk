@@ -1,0 +1,49 @@
+name: Temporary official Snapshot query
+
+on:
+  push:
+    branches: [prepare/doctalk0342-1094]
+
+permissions:
+  contents: read
+
+jobs:
+  query:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: e62b7d6a78c5a37a92e739277706ed7e129f0e75
+          persist-credentials: false
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit
+          deps-file: deps.cirru
+      - name: Query original definitions with the matching official CLI
+        run: |
+          set -euo pipefail
+          test "$(calcit --version)" = "0.30.1"
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          out=pathlib.Path('.calcit/query0342');out.mkdir(parents=True)
+          def query(*args):
+              r=subprocess.run(['calcit','calcit.cirru','query',*args,'--format','json'],capture_output=True,text=True)
+              if r.returncode:raise RuntimeError(r.stderr)
+              return json.loads(r.stdout)['data']
+          namespaces=query('ns')['namespaces'];definitions={}
+          for ns in namespaces:
+              if ns.endswith('.$meta'):continue
+              for row in query('defs',ns)['definitions']:
+                  target=ns+'/'+row['name'];definitions[target]=query('def',target)
+          (out/'definitions.json').write_text(json.dumps(definitions,ensure_ascii=False,indent=2)+'\n')
+          manifest={'commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'snapshotBlob':subprocess.check_output(['git','rev-parse','HEAD:calcit.cirru'],text=True).strip(),'cli':subprocess.check_output(['calcit','--version'],text=True).strip(),'definitions':len(definitions),'definitionsSha256':hashlib.sha256((out/'definitions.json').read_bytes()).hexdigest(),'scope':'Official query output only; no source edits, dependency execution, type/runtime acceptance or deployment.'}
+          (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps(manifest))
+          PY
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: doctalk-original-definitions
+          path: .calcit/query0342/
+          if-no-files-found: error
+          retention-days: 1
