@@ -181,7 +181,7 @@
                             {} $ :style $ {} (:padding |8px)
                             input $ {} (:style ui/input)
                               :value $ :demo state
-                            =< 8 nil
+                            space-x 8
                             <> "|demo page"
                             pre $ {} $ :inner-text
                               str "|backend data" $ format-cirru-edn store
@@ -252,7 +252,7 @@
             respo-ui.core :as ui
             respo.core :refer $ defcomp <> >> div span button input pre
             respo.comp.inspect :refer $ comp-inspect
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             app.comp.navigation :refer $ comp-navigation
             app.comp.profile :refer $ comp-profile
             app.comp.login :refer $ comp-login
@@ -290,7 +290,7 @@
                           d! $ app.schema/ClientOp :states cursor $ {}
                             :username $ decode-map-as (:value e) 'String
                             :password $ :password state
-                    =< nil 8
+                    space-y 8
                     div ({})
                       input $ {} (:placeholder |Password)
                         :value $ :password state
@@ -302,13 +302,13 @@
                           d! $ app.schema/ClientOp :states cursor $ {}
                             :username $ :username state
                             :password $ decode-map-as (:value e) 'String
-                  =< nil 8
+                  space-y 8
                   div
                     {} $ :style $ {} (:text-align :right)
                     span $ {} (:inner-text "|Sign up")
                       :style $ .merge ui/link
                       :on-click $ on-submit (:username state) (:password state) true
-                    =< 8 nil
+                    space-x 8
                     span $ {} (:inner-text "|Log in")
                       :style $ .merge ui/link
                       :on-click $ on-submit (:username state) (:password state) false
@@ -364,7 +364,7 @@
         :code $ quote $ ns app.comp.login
           :require
             respo.core :refer $ defcomp <> div input button span
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             respo.comp.inspect :refer $ comp-inspect
             respo-ui.core :as ui
             app.schema :as schema
@@ -390,7 +390,7 @@
                   :on-click $ fn (e d!)
                     d! $ app.schema/ClientOp :router/change $ {} (:name :profile)
                 <> $ if logged-in? |Me |Guest
-                =< 8 nil
+                space-x 8
                 <> $ match count-members
                   (:some n) (str n)
                   (:none) |
@@ -401,7 +401,7 @@
           :require
             respo.util.format :refer $ hsl
             respo-ui.core :as ui
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             respo.core :refer $ defcomp <> span div
             app.config :as config
     'app.comp.profile $ %{} 'FileEntry
@@ -417,11 +417,11 @@
                   schema/decode-optional-field user :name $ fn (value) (decode-map-as value 'String)
                   (:some name) name
                   (:none) |
-              =< nil 16
+              space-y 16
               div
                 {} $ :style ui/row
                 <> |Members:
-                =< 8 nil
+                space-x 8
                 list->
                   {} $ :style ui/row
                   map-list-kv members $ fn (k username)
@@ -431,14 +431,14 @@
                         :border-radius |16px
                         :margin "|0 4px"
                       <> $ .unwrap-or username |
-              =< nil 48
+              space-y 48
               div ({})
                 button
                   {}
                     :style $ .merge ui/button
                     :on-click $ fn (e d!) (refresh-location!)
                   <> |Refresh
-                =< 8 nil
+                space-x 8
                 button
                   {}
                     :style $ .merge ui/button $ {} (:color :red) (:border-color :red)
@@ -468,7 +468,7 @@
             app.schema :as schema
             respo-ui.core :as ui
             respo.core :refer $ defcomp list-> <> span div button
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             app.config :as config
     'app.config $ %{} 'FileEntry
       :defs $ {}
