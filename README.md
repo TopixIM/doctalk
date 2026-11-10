@@ -2,6 +2,11 @@
 DOC TALK
 ----
 
+### Calcit 0.40.0
+
+从源码构建时，前后端配套使用正式 Calcit 0.40.0，浏览器运行时使用
+`@calcit/procs` 0.40.0。WebSocket 报文与已有存档格式沿用原合同。
+
 ### 本轮 Map 方法维护：使用者影响
 
 14 处 Map 合并改用 `.merge`，保留参数求值、从左到右覆盖及单参数合并行为。
@@ -23,7 +28,7 @@ TODO
 
 https://github.com/Cumulo/calcium-workflow
 
-当前迁移候选精确配对正式 Calcit / `@calcit/procs` 0.36.0、
+此前的 0.36.0 迁移使用正式 Calcit / `@calcit/procs` 0.36.0、
 Caps 0.1.1、Node 24、Yarn 4.18.0。模块改用已共同验收的精确正式依赖图，不使用 hash、浮动 main
 或旧 Respo/UI alpha；未被任何应用代码或 namespace import 消费的 Lilac 已移除。
 Yarn 原配置与依赖隔离保持不变，未添加白名单或降低安全设置。

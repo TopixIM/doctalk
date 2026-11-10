@@ -52,13 +52,15 @@
                 reset! *states $ decode-map-as (update-states @*states cursor state) (Map Tag Dynamic)
               (:effect/connect) (connect!)
               (:session/remove-message id)
-                send-op! :session/remove-message $ {} $ :id id
+                send-op! :session/remove-message $ Option :some $ {} (:id id)
               (:user/log-in data)
-                send-op! :user/log-in $ schema/credentials-to-wire data
+                send-op! :user/log-in $ Option :some $ schema/credentials-to-wire data
               (:user/sign-up data)
-                send-op! :user/sign-up $ schema/credentials-to-wire data
-              (:user/log-out) (send-op! :user/log-out nil)
-              (:router/change data) (send-op! :router/change data)
+                send-op! :user/sign-up $ Option :some $ schema/credentials-to-wire data
+              (:user/log-out)
+                send-op! :user/log-out $ Option :none
+              (:router/change data)
+                send-op! :router/change $ Option :some data
             , &unit
           :examples $ []
           :schema $ quote $ Fn app.schema/ClientOp (-> Unit)
@@ -129,10 +131,14 @@
               contains? (#{} :user/log-in :user/sign-up) op
               println |Dispatch op
               println |Dispatch op data
-            ws-send! $ {} (:kind :op) (:op op) (:data data)
+            ws-send! $ match data
+              (:some value)
+                {} (:kind :op) (:op op) (:data value)
+              (:none)
+                {} (:kind :op) (:op op) (:data nil)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Tag T (-> Unit) (:generics T)
+          :schema $ quote $ Fn Tag (Option app.schema/WirePayload) (-> Unit)
         'simulate-login! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn simulate-login! ()
             match
@@ -557,6 +563,14 @@
             :extra $ Map Tag Dynamic
           :examples $ []
           :schema $ quote StructDef
+        'WireField $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion WireField String Tag
+          :examples $ []
+          :schema $ quote UnionDef
+        'WirePayload $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion WirePayload (Tuple String String) (Map Tag app.schema/WireField)
+          :examples $ []
+          :schema $ quote UnionDef
         'assoc-present $ %{} 'CodeEntry
           :doc "|Write a wire field only when the Option holds a value, so absence stays a missing key."
           :code $ quote $ defn assoc-present (fields field maybe-value)
@@ -572,7 +586,7 @@
             [] (:username data) (:password data)
           :examples $ []
           :schema $ quote $ Fn app.schema/Credentials
-            -> $ List String
+            -> $ Tuple String String
         'database $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def database
             {}
@@ -598,13 +612,8 @@
           :code $ quote $ defn decode-credentials (raw)
             if (list? raw)
               let
-                  values $ decode-map-as raw $ List String
-                if
-                  not= 2 $ .len values
-                  raise |Expected-two-credential-strings
-                Credentials :username
-                  .unwrap $ nth values 0
-                  , :password $ .unwrap $ nth values 1
+                  values $ decode-map-as raw $ Tuple String String
+                let[] (username password) values $ Credentials :username username :password password
               decode-map-as
                 if (struct? raw) (&struct:to-map raw) raw
                 , 'app.schema/Credentials
