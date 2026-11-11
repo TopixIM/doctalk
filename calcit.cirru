@@ -197,7 +197,9 @@
                                 str "|backend data" $ format-cirru-edn fields
                             :profile $ comp-profile
                               schema/decode-nullable-field fields :user $ fn (value)
-                                decode-map-as value $ Map Tag Dynamic
+                                schema/decode-optional-field
+                                  decode-map-as value $ Map Tag Dynamic
+                                  , :name $ fn (name) (decode-map-as name 'String)
                               schema/decode-nullable-field router :data app.schema/decode-members
                             _ $ <> $ str router
                         (:none)
@@ -424,16 +426,13 @@
     'app.comp.profile $ %{} 'FileEntry
       :defs $ {}
         'comp-profile $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defcomp comp-profile (user members)
+          :code $ quote $ defcomp comp-profile (username members)
             div
               {} $ :style $ .merge ui/flex
                 {} $ :padding 16
               div
                 {} $ :style $ {} (:font-family ui/font-fancy) (:font-size 32) (:font-weight 100)
-                <> $ str "|Hello! " $ match
-                  schema/decode-optional-field user :name $ fn (value) (decode-map-as value 'String)
-                  (:some name) name
-                  (:none) |
+                <> $ str "|Hello! " $ .unwrap-or username |
               =< nil 16
               div
                 {} $ :style ui/row
@@ -464,7 +463,7 @@
                       remove-storage! $ str $ :storage-key config/site
                   <> "|Log out"
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic)
+          :schema $ quote $ Fn (Option String)
             Map Number $ Option String
             -> respo.schema/Component
         'refresh-location! $ %{} 'CodeEntry (:doc |)
