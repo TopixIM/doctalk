@@ -2,10 +2,10 @@
 DOC TALK
 ----
 
-### Calcit 0.41.0
+### Calcit 0.41.1
 
-从源码构建时，前后端配套使用正式 Calcit 0.41.0，浏览器运行时使用
-`@calcit/procs` 0.41.0。WebSocket 报文与已有存档格式沿用原合同。
+从源码构建时，前后端配套使用正式 Calcit 0.41.1，浏览器运行时使用
+`@calcit/procs` 0.41.1。WebSocket 报文与已有存档格式沿用原合同。
 
 ### 本轮 Map 方法维护：使用者影响
 
