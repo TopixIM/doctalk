@@ -972,22 +972,23 @@
           :schema $ quote String
         'sync-clients! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn sync-clients! (reel) (begin-twig-frame!)
-            wss-each! $ fn (sid)
-              hint-fn $ Fn Number $ -> Unit
-              let
-                  db $ :db reel
-                  records $ :records reel
-                  session $ get (:sessions db) sid
-                  new-store $ twig-container db session records
-                  options $ {} $ :key :id
-                  changes $ match (get @*client-caches sid)
-                    (:some old-store) (diff-twig old-store new-store options)
-                    (:none) (diff-twig nil new-store options)
-                when
-                  not $ empty? changes
-                  wss-send! sid $ format-cirru-edn $ {} (:kind :patch) (:data changes)
-                  swap! *client-caches assoc sid new-store
-                , &unit
+            let
+                reel-length $ .len $ :records reel
+              wss-each! $ fn (sid)
+                hint-fn $ Fn Number $ -> Unit
+                let
+                    db $ :db reel
+                    session $ get (:sessions db) sid
+                    new-store $ twig-container db session reel-length
+                    options $ {} $ :key :id
+                    changes $ match (get @*client-caches sid)
+                      (:some old-store) (diff-twig old-store new-store options)
+                      (:none) (diff-twig nil new-store options)
+                  when
+                    not $ empty? changes
+                    wss-send! sid $ format-cirru-edn $ {} (:kind :patch) (:data changes)
+                    swap! *client-caches assoc sid new-store
+                  , &unit
             finish-twig-frame!
             , &unit
           :examples $ []
@@ -1010,13 +1011,12 @@
     'app.twig.container $ %{} 'FileEntry
       :defs $ {}
         'twig-container $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn twig-container (db maybe-session records)
+          :code $ quote $ defn twig-container (db maybe-session reel-length)
             let
                 raw-session $ match maybe-session
                   (:none) ({})
                   (:some session) (app.schema/session-to-wire session)
-                base-data $ {} (:logged-in? false) (:session raw-session)
-                  :reel-length $ .len records
+                base-data $ {} (:logged-in? false) (:session raw-session) (:reel-length reel-length)
               match maybe-session
                 (:none) base-data
                 (:some session)
@@ -1047,8 +1047,7 @@
                           :count $ .len $ :sessions db
                           :color $ rand-hex-color!
           :examples $ []
-          :schema $ quote $ Fn app.schema/Database (Option app.schema/Session)
-            List $ List Dynamic
+          :schema $ quote $ Fn app.schema/Database (Option app.schema/Session) Number
             -> $ Map Tag Dynamic
             :features :js-ffi
         'twig-members $ %{} 'CodeEntry (:doc |)
@@ -1119,7 +1118,7 @@
                     , 1 |route 6
                   removed $ updater profile (schema/ServerOp :session/remove-message |bad-password) 1 |remove 7
                   final-session $ .unwrap $ get (:sessions removed) 1
-                  view $ app.twig.container/twig-container removed (Some final-session) ([])
+                  view $ app.twig.container/twig-container removed (Some final-session) 0
                   view-user $ schema/decode-nullable-field view :user $ fn (value)
                     decode-map-as value $ Map Tag Dynamic
                   disconnected $ updater removed (schema/ServerOp :session/disconnect) 1 |disconnect 8
