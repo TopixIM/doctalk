@@ -574,9 +574,9 @@
               (:some value) (assoc fields field value)
               (:none) fields
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) Tag (Option T)
-            -> $ Map Tag Dynamic
-            :generics T
+          :schema $ quote $ Fn (Map K V) K (Option V)
+            -> $ Map K V
+            :generics K V
         'credentials-to-wire $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn credentials-to-wire (data)
             [] (:username data) (:password data)
