@@ -614,14 +614,14 @@
                 if (struct? raw) (&struct:to-map raw) raw
                 , 'app.schema/Credentials
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Credentials)
+          :schema $ quote $ Fn Input (-> Credentials) (:generics Input)
         'decode-database $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-database (raw)
             let
                 fields $ .merge database $ decode-map-as raw (Map Tag Dynamic)
               Database :users (decode-nullable-field fields :users decode-users) :sessions (decode-nullable-field fields :sessions decode-sessions) :extra $ -> fields (dissoc :users) (dissoc :sessions)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Database)
+          :schema $ quote $ Fn Input (-> Database) (:generics Input)
           :tests $ [] $ %{} 'TestEntry (:name |legacy-map-roundtrip-preserves-extensions)
             :code $ quote $ let
                 legacy $ {}
@@ -734,7 +734,7 @@
                     , nil
               raise |Expected-a-Reel-operation
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> ServerOp)
+          :schema $ quote $ Fn Input (-> ServerOp) (:generics Input)
         'decode-session $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-session (raw)
             let
@@ -753,7 +753,7 @@
                           decode-map-as value $ Map String Dynamic
                         , :extra $ -> fields (dissoc :id) (dissoc :user-id) (dissoc :nickname) (dissoc :router) (dissoc :messages)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> Session)
+          :schema $ quote $ Fn Input (-> Session) (:generics Input)
         'decode-sessions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-sessions (raw)
             filter-map-kv
@@ -779,7 +779,7 @@
                         decode-optional-field fields :avatar $ fn (value) (decode-map-as value 'String)
                         , :extra $ -> fields (dissoc :id) (dissoc :name) (dissoc :password) (dissoc :nickname) (dissoc :avatar)
           :examples $ []
-          :schema $ quote $ Fn Dynamic (-> User)
+          :schema $ quote $ Fn Input (-> User) (:generics Input)
         'decode-users $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-users (raw)
             filter-map-kv
