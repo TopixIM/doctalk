@@ -42,7 +42,7 @@
                     on-server-data $ decode-map-as raw $ Map Tag Dynamic
               , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'dispatch-action! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch-action! (action)
             match action
@@ -62,7 +62,7 @@
                 send-op! :router/change $ Some data
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/ClientOp (-> Unit)
+          :schema $ quote $ Fn schema/ClientOp (-> Unit) (:features :io :state)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             println "|Running mode:" $ if config/dev? |dev |release
@@ -73,7 +73,7 @@
             on-page-touch $ fn () $ if (.none? @*store) (connect!) &unit
             println "|App started!"
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mount-target ()
             .unwrap $ respo.ffi.browser/query-selector |.app
@@ -99,7 +99,7 @@
               (:none) (println "|unknown server data kind:" data)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Tag Dynamic) (-> Unit) (:features :io :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if
@@ -111,7 +111,7 @@
                 println "|Code updated."
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render! (mount-target)
@@ -121,7 +121,7 @@
                 , @*store
               fn (action) (dispatch-action! action)
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'send-op! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn send-op! (op data)
             when config/dev? $ if
@@ -135,7 +135,7 @@
                 {} (:kind :op) (:op op) (:data nil)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Tag (Option schema/WirePayload) (-> Unit)
+          :schema $ quote $ Fn Tag (Option schema/WirePayload) (-> Unit) (:features :io)
         'simulate-login! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn simulate-login! ()
             match
@@ -146,7 +146,7 @@
               (:none) (println "|Found no storage.")
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.client
           :require
@@ -232,6 +232,7 @@
           :schema $ quote $ Fn (Map Dynamic Dynamic)
             Option $ Map Tag Dynamic
             -> respo.schema/Component
+            :features :io
         'comp-offline $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-offline ()
             div
@@ -466,13 +467,14 @@
           :schema $ quote $ Fn (Option String)
             Map Number $ Option String
             -> respo.schema/Component
+            :features :io
         'refresh-location! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn refresh-location! ()
             js-ffi.browser/location-replace! $ str
               .-origin $ js-ffi.browser/location-host
               , |?time= $ unix-time-ms
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi)
         'remove-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn remove-storage! (storage-key) (js-ffi.browser/storage-remove! storage-key)
           :examples $ []
@@ -658,8 +660,9 @@
               fn (id value)
                 MapEntryDecision :keep id $ if (nil? value) None $ Some (decode-map-as value 'String)
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Number $ Option String
+            :generics Input
         'decode-nullable-field $ %{} 'CodeEntry
           :doc "|Legacy wire/state field boundary: decode Some payloads and send missing fields to the same decoder as nil. Preserve old nil/default/error behavior; generic T is the actual decoder result, not a cast of unknown data."
           :code $ quote $ defn decode-nullable-field (fields field decoder)
@@ -761,8 +764,9 @@
               fn (id value)
                 MapEntryDecision :keep id $ decode-session value
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Number Session
+            :generics Input
         'decode-user $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-user (raw)
             let
@@ -787,8 +791,9 @@
               fn (id value)
                 MapEntryDecision :keep id $ decode-user value
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map String User
+            :generics Input
         'session-to-wire $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn session-to-wire (session)
             -> (:extra session)
@@ -849,7 +854,7 @@
               reset! *reel $ reel-reducer @*reel updater action sid op-id op-time config/dev?
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/ServerOp Number (-> Unit)
+          :schema $ quote $ Fn schema/ServerOp Number (-> Unit) (:features :io :state)
         'get-backup-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn get-backup-path! ()
             let
@@ -881,7 +886,7 @@
             on-control-c on-exit!
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'on-client-message! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-client-message! (sid msg)
             let
@@ -902,11 +907,11 @@
                     println "|unknown action:" action
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Number String (-> Unit)
+          :schema $ quote $ Fn Number String (-> Unit) (:features :io :state)
         'on-exit! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-exit! () (persist-db!) (; println "|exit code is...") (quit! 0)
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'persist-db! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-db! ()
             let
@@ -919,7 +924,7 @@
               check-write-file! backup-path file-content
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (println "|Code updated..")
             if (not config/dev?) (raise "|reloading only happens in dev mode")
@@ -927,7 +932,7 @@
             reset! *reel $ refresh-reel @*reel @*initial-db replay-updater
             sync-clients! @*reader-reel
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'render-loop! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-loop! ()
             when
@@ -936,13 +941,13 @@
               sync-clients! @*reader-reel
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :state)
         'replay-updater $ %{} 'CodeEntry
           :doc "|Reel stores heterogeneous historical record cells. Decode real session/id/time types at replay instead of claiming updater accepts arbitrary values or preserves an unrelated generic Db."
           :code $ quote $ defn replay-updater (db op sid op-id op-time)
             updater db (schema/decode-server-op op) (decode-map-as sid 'Number) (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
           :examples $ []
-          :schema $ quote $ Fn schema/Database Dynamic Dynamic Dynamic Dynamic (-> schema/Database)
+          :schema $ quote $ Fn schema/Database Dynamic Dynamic Dynamic Dynamic (-> schema/Database) (:features :io)
         'run-server! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn run-server! (port)
             wss-serve!
@@ -961,7 +966,7 @@
                   _ $ println "|unknown data:" event
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn Number (-> FfiTask)
+          :schema $ quote $ Fn Number (-> FfiTask) (:features :io :state)
         'storage-file $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def storage-file
             if (empty? calcit-dirname)
@@ -991,7 +996,7 @@
             finish-twig-frame!
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (cumulo-reel.core/ReelState schema/Database) (-> Unit)
+          :schema $ quote $ Fn (cumulo-reel.core/ReelState schema/Database) (-> Unit) (:features :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.server
           :require (app.schema :as schema)
@@ -1092,7 +1097,7 @@
               (:unknown kind data)
                 do (eprintln |Unknown-op: kind) db
           :examples $ []
-          :schema $ quote $ Fn schema/Database schema/ServerOp Number String Number (-> schema/Database)
+          :schema $ quote $ Fn schema/Database schema/ServerOp Number String Number (-> schema/Database) (:features :io)
           :tests $ [] $ %{} 'TestEntry (:name |account-session-and-wire-lifecycle)
             :code $ quote $ do
               let
