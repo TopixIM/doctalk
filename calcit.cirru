@@ -38,7 +38,6 @@
                   :on-open $ fn (event) (simulate-login!)
                   :on-close $ fn (event) (reset! *store None) (js-ffi.shared/console-error! "|Lost connection!")
                   :on-data $ fn (raw)
-                    hint-fn $ Fn Dynamic $ -> Unit
                     on-server-data $ decode-map-as raw $ Map Tag Dynamic
               , &unit
           :examples $ []
@@ -689,7 +688,7 @@
               :router/change $ ServerOp :router/change $ decode-map-as data (Map Tag Dynamic)
               _ $ ServerOp :unknown kind data
           :examples $ []
-          :schema $ quote $ Fn Tag Dynamic (-> ServerOp)
+          :schema $ quote $ Fn Tag Payload (-> ServerOp) (:generics Payload)
         'decode-optional-field $ %{} 'CodeEntry
           :doc "|Decode legacy missing/nil wire fields into typed Option, invoking the payload decoder only for present non-nil values. A nullability normalization at the legacy Map boundary, not a cast or a new fallback value."
           :code $ quote $ defn decode-optional-field (fields field decoder)
