@@ -2,10 +2,12 @@
 DOC TALK
 ----
 
-### Calcit 0.42.1
+### Calcit 0.43.0
 
-从源码构建时，前后端配套使用正式 Calcit 0.42.1，浏览器运行时使用
-`@calcit/procs` 0.42.1。WebSocket 报文与已有存档格式沿用原合同。
+从源码构建时，前后端配套使用正式 Calcit 0.43.0，浏览器运行时使用
+`@calcit/procs` 0.43.0；服务端安装 `deps.cirru` 指定的 native 模块后再启动。
+WebSocket 报文、已有存档格式及 `/servers/paste-sharing/` 部署路径沿用原合同。
+合并部署前仍需确认后端环境和前后端协同升级。
 
 ### 本轮 Map 方法维护：使用者影响
 

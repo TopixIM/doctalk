@@ -134,7 +134,7 @@
                 {} (:kind :op) (:op op) (:data nil)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn Tag (Option schema/WirePayload) (-> Unit) (:features :io)
+          :schema $ quote $ Fn Tag (Option schema/WirePayload) (-> Unit) (:features :io :state)
         'simulate-login! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn simulate-login! ()
             match
