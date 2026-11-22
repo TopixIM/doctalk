@@ -33,12 +33,14 @@
                 host $ .unwrap-or (js-ffi.shared/search-params-get params |host) (.-hostname location)
                 port $ .unwrap-or (js-ffi.shared/search-params-get params |port)
                   str $ :port config/site
-              ws-connect! (str |ws:// host |: port)
-                {}
-                  :on-open $ fn (event) (simulate-login!)
-                  :on-close $ fn (event) (reset! *store None) (js-ffi.shared/console-error! "|Lost connection!")
-                  :on-data $ fn (raw)
-                    on-server-data $ decode-map-as raw $ Map Tag Dynamic
+                opened $ fn (event) (simulate-login!) &unit
+                closed $ fn (event) (reset! *store None) (js-ffi.shared/console-error! "|Lost connection!") &unit
+                received $ fn (raw)
+                  on-server-data $ decode-map-as raw $ Map Tag Dynamic
+                  , &unit
+              ws-edn.client/ws-connect-typed! (str |ws:// host |: port)
+                ws-edn.client/ClientConfig :retry-base-ms None :retry-max-ms None :retry-jitter None :heartbeat-timeout-ms None :class-mapper $ {}
+                ws-edn.client/ClientCallbacks :on-open (Some opened) :on-close (Some closed) :on-error None :on-data $ Some received
               , &unit
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
