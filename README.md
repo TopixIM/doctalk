@@ -7,9 +7,9 @@ DOC TALK
 从源码构建时，前后端配套使用正式 Calcit 0.44.0，浏览器运行时使用
 `@calcit/procs` 0.44.0；服务端安装 `deps.cirru` 指定的 native 模块后再启动。
 标准库 0.2.58 和 WSS 0.2.46 与 Calcit 0.44.0 配对，需要为服务端目标架构重新构建。
-正式依赖图对齐 Cumulo Reel 0.3.8、WS-EDN 0.2.6 与 Recollect 0.3.10，前后端需配套更新。
+正式依赖图对齐 Cumulo Reel 0.3.9、WS-EDN 0.2.7 与 Recollect 0.3.10，前后端需配套更新。
 
-WebSocket 报文、已有存档格式及 `/servers/paste-sharing/` 部署路径沿用原合同。
+客户端使用按事件区分的类型化 WebSocket 回调。WebSocket 报文、已有存档格式及 `/servers/paste-sharing/` 部署路径沿用原合同。
 合并部署前仍需确认后端环境和前后端协同升级。
 
 ### 本轮 Map 方法维护：使用者影响
