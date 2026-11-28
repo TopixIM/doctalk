@@ -2,12 +2,12 @@
 DOC TALK
 ----
 
-### Calcit 0.45.1
+### Calcit 0.46.0
 
-从源码构建时，前后端配套使用正式 Calcit 0.45.1，浏览器运行时使用
-`@calcit/procs` 0.45.1；服务端安装 `deps.cirru` 指定的 native 模块后再启动。
-标准库 0.2.59 和 WSS 0.2.47 与 Calcit 0.45.1 配对，需要为服务端目标架构重新构建。
-正式依赖图对齐 Cumulo Reel 0.3.13、WS-EDN 0.3.2 与 Recollect 0.3.14，前后端需配套更新。
+从源码构建时，前后端配套使用正式 Calcit 0.46.0，浏览器运行时使用
+`@calcit/procs` 0.46.0；服务端安装 `deps.cirru` 指定的 native 模块后再启动。
+标准库 0.2.60 和 WSS 0.2.48 与 Calcit 0.46.0 配对，需要为服务端目标架构重新构建。
+依赖图对齐 Cumulo Reel 0.3.14、WS-EDN 0.3.4，并精确使用 Recollect 的 0.46 维护标签 `0.3.15-calcit.0.46.0`；不要混用面向 Calcit 0.47.1 的正式 0.3.15。前后端需配套更新。
 
 客户端使用按事件区分的类型化 WebSocket 回调。WebSocket 报文、已有存档格式及 `/servers/paste-sharing/` 部署路径沿用原合同。
 合并部署前仍需确认后端环境和前后端协同升级。
